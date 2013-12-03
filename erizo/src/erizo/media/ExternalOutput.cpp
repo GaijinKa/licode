@@ -6,6 +6,8 @@
 #include <boost/cstdint.hpp>
 #include <sys/time.h>
 #include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 namespace erizo {
 #define FIR_INTERVAL_MS 4000
