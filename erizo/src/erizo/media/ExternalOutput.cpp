@@ -318,7 +318,7 @@ namespace erizo {
 
       context_->streams[0] = video_st;
       context_->streams[1] = audio_st;
-      aviores_ = avio_open(&context_->pb, &videoCodecCtx_->filename, AVIO_FLAG_WRITE);
+      aviores_ = url_fopen(&context_->pb, &context_->filename, URL_WRONLY); //avio_open(&context_->pb, &context_->filename, AVIO_FLAG_WRITE);
       if (aviores_<0){
         ELOG_ERROR("Error opening output file");
         return false;
