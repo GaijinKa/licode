@@ -51,7 +51,7 @@ namespace erizo {
       return false;
     }
 
-    path += "/"+room+"/";
+    path += room+"/";
     struct stat st = {0};
 
     if (stat(path.c_str(), &st) == -1) {
