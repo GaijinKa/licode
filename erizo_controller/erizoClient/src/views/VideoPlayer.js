@@ -46,7 +46,7 @@ Erizo.VideoPlayer = function (spec) {
     });*/
 
     L.Logger.debug('Creating URL from stream ' + that.stream);
-    var myURL = window.URL || webkitURL;
+    var myURL = URL || webkitURL || mozURL || msURL;
     that.stream_url = myURL.createObjectURL(that.stream);
 
     // Container
@@ -54,6 +54,12 @@ Erizo.VideoPlayer = function (spec) {
     that.div.setAttribute('id', 'player_' + that.id);
     that.div.setAttribute('style', 'width: 100%; height: 100%; position: relative; background-color: black; overflow: hidden;');
 
+    //overlay
+	that.overlay = document.createElement('div');
+	that.overlay.setAttribute('id', 'overlay_' + that.id);
+    that.overlay.setAttribute('class', 'overlayVideo');
+	textWarning = document.createTextNode(not_pub_yet);
+	
     // Loader icon
     that.loader = document.createElement('img');
     that.loader.setAttribute('style', 'width: 16px; height: 16px; position: absolute; top: 50%; left: 50%; margin-top: -8px; margin-left: -8px');
@@ -82,7 +88,9 @@ Erizo.VideoPlayer = function (spec) {
     that.parentNode = that.div.parentNode;
 
     that.div.appendChild(that.loader);
-    that.div.appendChild(that.video);
+    that.div.appendChild(that.overlay);
+	that.overlay.appendChild(textWarning);
+	that.div.appendChild(that.video);
 
     that.containerWidth = 0;
     that.containerHeight = 0;
@@ -140,6 +148,15 @@ Erizo.VideoPlayer = function (spec) {
 
     }, 500);
 
+    that.showOverlay = function () {
+		L.Logger.debug('Displaying overlay for ' + that.stream);	
+		document.getElementById("overlay_"+that.id).style.display = "block";
+    };
+
+    that.hideOverlay = function () {
+		L.Logger.debug('Hiding overlay for ' + that.id);	
+		document.getElementById("overlay_"+that.id).style.display = "none";
+    };
 
     // Bottom Bar
     that.bar = new Erizo.Bar({elementID: 'player_' + that.id, id: that.id, stream: spec.stream, media: that.video, options: spec.options});

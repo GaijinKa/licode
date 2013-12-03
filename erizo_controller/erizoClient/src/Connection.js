@@ -12,33 +12,34 @@ Erizo.Connection = function (spec) {
 
     // Check which WebRTC Stack is installed.
     that.browser = "";
-
     if (typeof module !== 'undefined' && module.exports) {
+	    console.log("FcStack");
         L.Logger.error('Publish/subscribe video/audio streams not supported in erizofc yet');
         that = Erizo.FcStack(spec);
-    } else if (window.navigator.userAgent.match("Firefox") !== null) {
-        // Firefox
-        that.browser = "mozilla";
-        that = Erizo.FirefoxStack(spec);
-    } else if (window.navigator.appVersion.match(/Chrome\/([\w\W]*?)\./)[1] <= 31) {
+    } else if (BrowserDetect.browser == "Chrome" && (parseInt(BrowserDetect.version)>=25 && parseInt(BrowserDetect.version)<32)) {
         // Google Chrome Stable.
-        L.Logger.debug("Stable!");
+        console.log("Stable! "+parseInt(BrowserDetect.version));
         that = Erizo.ChromeStableStack(spec);
         that.browser = "chrome-stable";
-    } else if (window.navigator.userAgent.toLowerCase().indexOf("chrome")>=0) {
+    } else if (BrowserDetect.browser == "Chrome" && (parseInt(BrowserDetect.version)>=32)) {
         // Google Chrome Canary.
-        L.Logger.debug("Canary!");
+        console.log("Canary! "+parseInt(BrowserDetect.version));
         that = Erizo.ChromeCanaryStack(spec);
         that.browser = "chrome-canary";
-    }  else if (window.navigator.appVersion.match(/Bowser\/([\w\W]*?)\./)[1] === "25") {
+    } else if (BrowserDetect.browser == "Bowser" && (parseInt(BrowserDetect.version) == "25"|| parseInt(BrowserDetect.version)== "28")) {
         // Bowser
         that.browser = "bowser";
+    } else if (BrowserDetect.browser == "Firefox" && (parseInt(BrowserDetect.version) >= 20 || parseInt(BrowserDetect.version) < 23)) {
+        // Firefox
+		console.log("Firefox!");
+		that = Erizo.FireFoxStack(spec);
+        that.browser = "mozilla";
     } else {
         // None.
         that.browser = "none";
         throw "WebRTC stack not available";
     }
-
+    
     return that;
 };
 

@@ -76,7 +76,7 @@ Erizo.Stream = function (spec) {
                 }
                 L.Logger.debug(opt);
                 Erizo.GetUserMedia(opt, function (stream) {
-                //navigator.webkitGetUserMedia("audio, video", function (stream) {
+               // navigator.webkitGetUserMedia("audio, video", function (stream) {
 
                     L.Logger.info("User has granted access to local media.");
                     that.stream = stream;
@@ -112,7 +112,7 @@ Erizo.Stream = function (spec) {
         }
     };
 
-    that.play = function (elementID, options) {
+    that.play = function (elementID, options, callback) {
         that.elementID = elementID;
         if (that.hasVideo() || this.hasScreen()) {
             // Draw on HTML
@@ -120,6 +120,8 @@ Erizo.Stream = function (spec) {
                 var player = new Erizo.VideoPlayer({id: that.getID(), stream: that, elementID: elementID, options: options});
                 that.player = player;
                 that.showing = true;
+                if (callback)
+                	callback();
             }
         } else if (that.hasAudio) {
             var player = new Erizo.AudioPlayer({id: that.getID(), stream: that, elementID: elementID, options: options});
@@ -172,6 +174,18 @@ Erizo.Stream = function (spec) {
             return null;
         }
     };
+    
+    that.showOverlay = function () {
+        if (that.player !== undefined) {
+            that.player.showOverlay();
+        }	
+	}
+	
+	that.hideOverlay = function () {
+        if (that.player !== undefined) {
+            that.player.hideOverlay();
+        }	
+	}
 
     that.getVideoFrameURL = function (format) {
         var canvas = getFrame();

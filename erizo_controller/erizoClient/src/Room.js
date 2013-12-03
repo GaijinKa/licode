@@ -347,6 +347,9 @@ Erizo.Room = function (spec) {
                                 }
                                 that.localStreams[id] = stream;
                                 stream.room = that;
+                                if (callback)
+                                    callback();
+
                             };
                             stream.pc.processSignalingMessage(answer);
                         });
@@ -376,15 +379,28 @@ Erizo.Room = function (spec) {
         }
     };
 
-    that.startRecording = function (stream){
-      recordingUrl = "/tmp/recording" + stream.getID() + ".mkv";
-      L.Logger.debug("Start Recording " + recordingUrl);
-      sendMessageSocket('startRecorder',{to:stream.getID(), url: recordingUrl});
-    }
+    
+    // Start Recording
+    that.record = function (stream, name, room, callback, errorCallback) {
+    	L.Logger.debug("Start Recording " + name + "in room "+ room);
+        sendMessageSocket('startRecorder', {to: stream.getID(), name: name, room: room}, callback, errorCallback);
+    };
+    
+    // Stop Recording
+    that.stoprecord = function (stream, callback, errorCallback) {
+        sendMessageSocket('stopRecorder', {to:stream.getID()}, callback, errorCallback);
+    };
 
-    that.stopRecording = function (stream){
-      sendMessageSocket('stopRecorder',{to:stream.getID(),url:recordingUrl});
-    }
+    
+//    that.startRecording = function (stream){
+//      recordingUrl = "/tmp/recording" + stream.getID() + ".mkv";
+//      L.Logger.debug("Start Recording " + recordingUrl);
+//      sendMessageSocket('startRecorder',{to:stream.getID(), url: recordingUrl});
+//    }
+//
+//    that.stopRecording = function (stream){
+//      sendMessageSocket('stopRecorder',{to:stream.getID(),url:recordingUrl});
+//    }
 
     // It unpublishes the local stream in the room, dispatching a StreamEvent("stream-removed")
     that.unpublish = function (stream) {

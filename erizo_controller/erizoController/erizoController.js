@@ -278,7 +278,7 @@ var listen = function () {
         socket.on('publish', function (options, sdp, callback) {
             var id, st;
             if (!socket.user.permissions[Permission.PUBLISH]) {
-		callback('error', 'unauthorized');
+            	callback('error', 'unauthorized');
                 return;
             }
             if (options.state === 'url') {
