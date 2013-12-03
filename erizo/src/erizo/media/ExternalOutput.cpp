@@ -77,6 +77,7 @@ namespace erizo {
 	ftime(&tmb);
 	unsigned long int timestmp_Sec =  tmb.time;
 	unsigned short int timestmp_Mill = tmb.millitm;
+
 	if (timestmp_Mill<100) timestmp_Mill += 99;
         const int n1 = snprintf(NULL, 0, "%lu", timestmp_Sec);
         char timestmp_string1[n1+1];
