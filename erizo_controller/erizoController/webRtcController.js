@@ -149,22 +149,21 @@ exports.WebRtcController = function () {
         }
     };
 
-    that.addExternalOutput = function (to, url, name, room) {
+    that.addExternalOutput = function (to, name, room) {
         if (publishers[to] !== undefined) {
-            logger.info("Adding ExternalOutput to " + to + " url " + url);
-            var externalOutput = new addon.ExternalOutput(url);
+            logger.info("Adding ExternalOutput to " + to + " ID " + name+room);
+            var externalOutput = new addon.ExternalOutput();
             externalOutput.init(config.erizo.recorderpath, name, room);
-            publishers[to].addExternalOutput(externalOutput, url);
-            externalOutputs[url] = externalOutput;
+            publishers[to].addExternalOutput(externalOutput, name+room);
+            externalOutputs[name+room] = externalOutput;
         }
-
     };
 
-    that.removeExternalOutput = function (to, url) {
+    that.removeExternalOutput = function (to, name, room) {
       if (externalOutputs[url] !== undefined && publishers[to]!=undefined) {
-        logger.info("Stopping ExternalOutput: url " + url);
-        publishers[to].removeSubscriber(url);
-        delete externalOutputs[url];
+        logger.info("Stopping ExternalOutput: id " + name+room);
+        publishers[to].removeSubscriber(name+room);
+        delete externalOutputs[name+room];
       }
     };
 
