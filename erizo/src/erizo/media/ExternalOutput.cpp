@@ -87,7 +87,7 @@ namespace erizo {
 	c = snprintf(timestmp_string2, n2+1, "%lu", timestmp_Mill);
 
  	globalpath = globalpath +"_"+timestmp_string1+timestmp_string2+".webm";
- 	std::out("saved file path is %s",globalpath);
+ 	ELOG_ERROR("saved file path is %s",globalpath);
   	snprintf(context_->filename, sizeof(context_->filename), globalpath.c_str());
   	/* meetecho code */
 
