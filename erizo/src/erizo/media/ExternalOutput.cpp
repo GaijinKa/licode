@@ -285,9 +285,17 @@ namespace erizo {
         ELOG_ERROR("Could not find codec");
         return false;
       }
-      video_st = avformat_new_stream (context_, videoCodec_);
-      video_st->id = 0;
-      videoCodecCtx_ = video_st->codec;
+      /*Paolo*/
+      vStream = av_new_stream(context_, 0);
+      if(vStream == NULL) {
+       		ELOG_ERROR("Error adding stream");
+       		return -1;
+      }
+      avcodec_get_context_defaults2(vStream->codec, AVMEDIA_TYPE_VIDEO);
+      /*fine paolo*/
+//       video_st = avformat_new_stream (context_, videoCodec_);
+//      video_st->id = 0;
+      videoCodecCtx_ = vStream->codec;
       videoCodecCtx_->codec_id = oformat_->video_codec;
       videoCodecCtx_->width = 320;
       videoCodecCtx_->height = 240;
@@ -297,7 +305,7 @@ namespace erizo {
         videoCodecCtx_->flags|=CODEC_FLAG_GLOBAL_HEADER;
       }
 //      oformat_->flags |= AVFMT_VARIABLE_FPS;
-      ELOG_DEBUG("Init audio context");
+//      ELOG_DEBUG("Init audio context");
 
   //    audioCodec_ = avcodec_find_encoder(oformat_->audio_codec);
   //    ELOG_DEBUG("Found Audio Codec %s", audioCodec_->name);
@@ -316,7 +324,7 @@ namespace erizo {
   //      audioCodecCtx_->flags|=CODEC_FLAG_GLOBAL_HEADER;
   //    }
 
-      context_->streams[0] = video_st;
+  //    context_->streams[0] = video_st;
   //   context_->streams[1] = audio_st;
       aviores_ = avio_open(&context_->pb, context_->filename, AVIO_FLAG_WRITE);
       if (aviores_<0){
