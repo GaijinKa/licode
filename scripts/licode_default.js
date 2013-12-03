@@ -46,6 +46,9 @@ config.cloudProvider.host = '';
 config.cloudProvider.accessKey = '';
 config.cloudProvider.secretAccessKey = '';
 
+// Recording 
+config.erizo.recorderpath = "/home/ubuntu/lynckia/recorded/";
+
 // Roles to be used by services
 config.roles = {"presenter":["publish", "subscribe", "record"], "viewer":["subscribe"]};
 
