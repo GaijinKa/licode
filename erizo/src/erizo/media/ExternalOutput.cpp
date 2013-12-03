@@ -68,7 +68,7 @@ namespace erizo {
     }
     context_->oformat = oformat_;
     context_->oformat->video_codec = AV_CODEC_ID_VP8;
-    context_->oformat->audio_codec = AV_CODEC_ID_PCM_MULAW;
+    context_->oformat->audio_codec = AV_CODEC_ID_VORBIS;
 
     /*start meetecho code*/
     context_->oformat->flags |= AVFMT_TS_NONSTRICT;
