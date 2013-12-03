@@ -12,9 +12,9 @@ namespace erizo {
 
   DEFINE_LOGGER(ExternalOutput, "media.ExternalOutput");
 
-  ExternalOutput::ExternalOutput(std::string outputUrl){
-    ELOG_DEBUG("Created ExternalOutput to %s", outputUrl.c_str());
-    url = outputUrl;
+  ExternalOutput::ExternalOutput(){
+    //ELOG_DEBUG("Created ExternalOutput to %s", outputUrl.c_str());
+    //url = outputUrl;
     sinkfbSource_=NULL;
     audioSinkSSRC_ = 0;
     videoSinkSSRC_ = 0;
@@ -60,7 +60,7 @@ namespace erizo {
 //  oformat_ = av_guess_format(NULL,  url.c_str(), NULL);
     oformat_ = av_guess_format("webm", NULL, NULL);
     if (!oformat_){
-      ELOG_ERROR("Error opening output file %s", url.c_str());
+      ELOG_ERROR("Error opening output file");
       return false;
     }
     context_->oformat = oformat_;
@@ -315,7 +315,7 @@ namespace erizo {
 
       context_->streams[0] = video_st;
       context_->streams[1] = audio_st;
-      aviores_ = avio_open(&context_->pb, url.c_str(), AVIO_FLAG_WRITE);
+      aviores_ = avio_open(&context_->pb, &context_->filename, AVIO_FLAG_WRITE);
       if (aviores_<0){
         ELOG_ERROR("Error opening output file");
         return false;

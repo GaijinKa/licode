@@ -26,11 +26,8 @@ void ExternalOutput::Init(Handle<Object> target) {
 Handle<Value> ExternalOutput::New(const Arguments& args) {
   HandleScope scope;
 
-  v8::String::Utf8Value param(args[0]->ToString());
-  std::string url = std::string(*param);
-
   ExternalOutput* obj = new ExternalOutput();
-  obj->me = new erizo::ExternalOutput(url);
+  obj->me = new erizo::ExternalOutput();
 
   obj->Wrap(args.This());
 
@@ -53,8 +50,16 @@ Handle<Value> ExternalOutput::init(const Arguments& args) {
 
   ExternalOutput* obj = ObjectWrap::Unwrap<ExternalOutput>(args.This());
   erizo::ExternalOutput *me = (erizo::ExternalOutput*) obj->me;
+  v8::String::Utf8Value param(args[0]->ToString());
+  v8::String::Utf8Value param2(args[1]->ToString());
+  v8::String::Utf8Value param3(args[2]->ToString());
 
-  int r = me->init();
+// convert it to string
+  std::string path = std::string(*param);
+  std::string name = std::string(*param2);
+  std::string room = std::string(*param3);
+
+  int r = me->init(path, name, room);
 
   return scope.Close(Integer::New(r));
 }

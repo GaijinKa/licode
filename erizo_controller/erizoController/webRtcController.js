@@ -149,11 +149,11 @@ exports.WebRtcController = function () {
         }
     };
 
-    that.addExternalOutput = function (to, url) {
+    that.addExternalOutput = function (to, url, name, room) {
         if (publishers[to] !== undefined) {
             logger.info("Adding ExternalOutput to " + to + " url " + url);
             var externalOutput = new addon.ExternalOutput(url);
-            externalOutput.init();
+            externalOutput.init(config.erizo.recorderpath, name, room);
             publishers[to].addExternalOutput(externalOutput, url);
             externalOutputs[url] = externalOutput;
         }
