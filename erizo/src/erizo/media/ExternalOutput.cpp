@@ -318,9 +318,9 @@ namespace erizo {
 
       context_->streams[0] = video_st;
   //   context_->streams[1] = audio_st;
-      aviores_ = url_fopen(&context_->pb, globalpath.c_str(), URL_WRONLY); //avio_open(&context_->pb, globalpath.c_str(), AVIO_FLAG_WRITE);
+      aviores_ = avio_open(&context_->pb, globalpath.c_str(), AVIO_FLAG_WRITE);
       if (aviores_<0){
-        ELOG_ERROR("Error opening output file AVIO_OPEN");
+        ELOG_ERROR("Error opening output file AVIO_OPEN %d",aviores_);
         return false;
       }
       writeheadres_ = avformat_write_header(context_, NULL);
