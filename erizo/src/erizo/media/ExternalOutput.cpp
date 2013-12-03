@@ -296,7 +296,7 @@ namespace erizo {
       if (oformat_->flags & AVFMT_GLOBALHEADER){
         videoCodecCtx_->flags|=CODEC_FLAG_GLOBAL_HEADER;
       }
-      oformat_->flags |= AVFMT_VARIABLE_FPS;
+//      oformat_->flags |= AVFMT_VARIABLE_FPS;
       ELOG_DEBUG("Init audio context");
 
   //    audioCodec_ = avcodec_find_encoder(oformat_->audio_codec);
