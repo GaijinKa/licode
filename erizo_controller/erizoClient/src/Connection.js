@@ -32,7 +32,7 @@ Erizo.Connection = function (spec) {
     } else if (BrowserDetect.browser == "Firefox" && (parseInt(BrowserDetect.version) >= 20 || parseInt(BrowserDetect.version) < 23)) {
         // Firefox
 		console.log("Firefox!");
-		that = Erizo.FireFoxStack(spec);
+		that = Erizo.FirefoxStack(spec);
         that.browser = "mozilla";
     } else {
         // None.
