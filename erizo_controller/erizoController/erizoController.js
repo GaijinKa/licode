@@ -373,7 +373,7 @@ var listen = function () {
           var streamId = options.to;
           var username = options.name;
           var room = options.room;
-          logger.info("erizoController.js: Starting recorder streamID " + streamId + ", for user " + name + " in room " + room);
+          logger.info("erizoController.js: Starting recorder streamID " + streamId + ", for user " + username + " in room " + room);
             if (socket.room.streams[streamId].hasAudio() || socket.room.streams[streamId].hasVideo() || socket.room.streams[streamId].hasScreen()) {
                 socket.room.webRtcController.addExternalOutput(streamId, username, room);
                 logger.info("erizoController.js: Recorder Started");
