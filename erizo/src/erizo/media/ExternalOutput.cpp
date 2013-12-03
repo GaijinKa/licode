@@ -68,7 +68,7 @@ namespace erizo {
     }
     context_->oformat = oformat_;
     context_->oformat->video_codec = AV_CODEC_ID_VP8;
-    context_->oformat->audio_codec = AV_CODEC_ID_PCM_MULAW;
+//    context_->oformat->audio_codec = AV_CODEC_ID_PCM_MULAW;
 
     /*start meetecho code*/
     context_->oformat->flags |= AVFMT_TS_NONSTRICT;
@@ -98,14 +98,14 @@ namespace erizo {
     //    m.processorType = RTP_ONLY;
     m.hasVideo = false;
     m.hasAudio = false;
-    if (m.hasAudio) {
-      m.audioCodec.sampleRate = 8000;
-      m.audioCodec.bitRate = 64000;
-      m.audioCodec.codec = AUDIO_CODEC_VORBIS;
-      audioCoder_ = new AudioEncoder();
-      if (!audioCoder_->initEncoder(m.audioCodec))
-        exit(0);
-    }
+ //   if (m.hasAudio) {
+ //     m.audioCodec.sampleRate = 8000;
+ //     m.audioCodec.bitRate = 64000;
+ //     m.audioCodec.codec = AUDIO_CODEC_VORBIS;
+ //     audioCoder_ = new AudioEncoder();
+ //     if (!audioCoder_->initEncoder(m.audioCodec))
+ //       exit(0);
+ //   }
     gotUnpackagedFrame_ = 0;
     unpackagedSize_ = 0;
     in->init(m, this);
@@ -146,47 +146,47 @@ namespace erizo {
 
 
   int ExternalOutput::deliverAudioData(char* buf, int len){
-    if (in!=NULL){
-      if (videoCodec_ == NULL) {
-        return 0;
-      }
-      rtpheader *head = (rtpheader*)buf;
-      //We dont need any other payload at this time
-      if(head->payloadtype != PCMU_8000_PT){
-        return 0;
-      }
+  //  if (in!=NULL){
+  //    if (videoCodec_ == NULL) {
+  //      return 0;
+  //    }
+  //    rtpheader *head = (rtpheader*)buf;
+  //    //We dont need any other payload at this time
+  //    if(head->payloadtype != PCMU_8000_PT){
+  //      return 0;
+  //    }
 
-      int ret = in->unpackageAudio(reinterpret_cast<unsigned char*>(buf), len,
-          unpackagedAudioBuffer_);
-      if (ret <= 0)
-        return ret;
-      timeval time;
-      gettimeofday(&time, NULL);
-      unsigned long long millis = (time.tv_sec * 1000) + (time.tv_usec / 1000);
-      if (millis -lastTime_ >FIR_INTERVAL_MS){
-        this->sendFirPacket();
-        lastTime_ = millis;
-      }
-      if (initTime_ == 0) {
-        initTime_ = millis;      
-      }
-      if (millis < initTime_){
-        ELOG_WARN("initTime is smaller than currentTime, possible problems when recording ");
-      }
-      if (ret > UNPACKAGE_BUFFER_SIZE){
-        ELOG_ERROR("Unpackaged Audio size too big %d", ret);
-      }
-      AVPacket avpkt;
-      av_init_packet(&avpkt);
-      avpkt.data = unpackagedAudioBuffer_;
-      avpkt.size = ret;
-      avpkt.pts = millis - initTime_;
-      avpkt.stream_index = 1;
-      av_write_frame(context_, &avpkt);
-      av_free_packet(&avpkt);
-      return ret;
+//      int ret = in->unpackageAudio(reinterpret_cast<unsigned char*>(buf), len,
+//          unpackagedAudioBuffer_);
+//      if (ret <= 0)
+//        return ret;
+//      timeval time;
+//      gettimeofday(&time, NULL);
+//      unsigned long long millis = (time.tv_sec * 1000) + (time.tv_usec / 1000);
+//      if (millis -lastTime_ >FIR_INTERVAL_MS){
+//        this->sendFirPacket();
+//        lastTime_ = millis;
+//      }
+//      if (initTime_ == 0) {
+//        initTime_ = millis;
+//      }
+//      if (millis < initTime_){
+//        ELOG_WARN("initTime is smaller than currentTime, possible problems when recording ");
+//      }
+//      if (ret > UNPACKAGE_BUFFER_SIZE){
+//        ELOG_ERROR("Unpackaged Audio size too big %d", ret);
+//      }
+//      AVPacket avpkt;
+//      av_init_packet(&avpkt);
+//      avpkt.data = unpackagedAudioBuffer_;
+//      avpkt.size = ret;
+//      avpkt.pts = millis - initTime_;
+//      avpkt.stream_index = 1;
+//      av_write_frame(context_, &avpkt);
+//      av_free_packet(&avpkt);
+//      return ret;
 
-    }
+//    }
     return 0;
   }
 
@@ -299,25 +299,25 @@ namespace erizo {
       oformat_->flags |= AVFMT_VARIABLE_FPS;
       ELOG_DEBUG("Init audio context");
 
-      audioCodec_ = avcodec_find_encoder(oformat_->audio_codec);
-      ELOG_DEBUG("Found Audio Codec %s", audioCodec_->name);
-      if (audioCodec_==NULL){
-        ELOG_ERROR("Could not find audio codec");
-        return false;
-      }
-      audio_st = avformat_new_stream (context_, audioCodec_);
-      audio_st->id = 1;
-      audioCodecCtx_ = audio_st->codec;
-      audioCodecCtx_->codec_id = oformat_->audio_codec;
-      audioCodecCtx_->sample_rate = 8000;
-      audioCodecCtx_->channels = 1;
+  //    audioCodec_ = avcodec_find_encoder(oformat_->audio_codec);
+  //    ELOG_DEBUG("Found Audio Codec %s", audioCodec_->name);
+  //    if (audioCodec_==NULL){
+  //      ELOG_ERROR("Could not find audio codec");
+  //      return false;
+  //    }
+  //    audio_st = avformat_new_stream (context_, audioCodec_);
+  //    audio_st->id = 1;
+  //    audioCodecCtx_ = audio_st->codec;
+  //    audioCodecCtx_->codec_id = oformat_->audio_codec;
+  //    audioCodecCtx_->sample_rate = 8000;
+  //    audioCodecCtx_->channels = 1;
       //      audioCodecCtx_->sample_fmt = AV_SAMPLE_FMT_S8;
-      if (oformat_->flags & AVFMT_GLOBALHEADER){
-        audioCodecCtx_->flags|=CODEC_FLAG_GLOBAL_HEADER;
-      }
+  //    if (oformat_->flags & AVFMT_GLOBALHEADER){
+  //      audioCodecCtx_->flags|=CODEC_FLAG_GLOBAL_HEADER;
+  //    }
 
       context_->streams[0] = video_st;
-      context_->streams[1] = audio_st;
+  //   context_->streams[1] = audio_st;
       aviores_ = avio_open(&context_->pb, globalpath.c_str(), AVIO_FLAG_WRITE);
       if (aviores_<0){
         ELOG_ERROR("Error opening output file AVIO_OPEN");
