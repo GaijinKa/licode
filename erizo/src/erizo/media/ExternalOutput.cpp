@@ -285,17 +285,9 @@ namespace erizo {
         ELOG_ERROR("Could not find codec");
         return false;
       }
-      /*Paolo*/
-      vStream = av_new_stream(context_, 0);
-      if(vStream == NULL) {
-       		ELOG_ERROR("Error adding stream");
-       		return -1;
-      }
-      avcodec_get_context_defaults2(vStream->codec, AVMEDIA_TYPE_VIDEO);
-      /*fine paolo*/
-//       video_st = avformat_new_stream (context_, videoCodec_);
-//      video_st->id = 0;
-      videoCodecCtx_ = vStream->codec;
+      video_st = avformat_new_stream (context_, videoCodec_);
+      video_st->id = 0;
+      videoCodecCtx_ = video_st->codec;
       videoCodecCtx_->codec_id = oformat_->video_codec;
       videoCodecCtx_->width = 320;
       videoCodecCtx_->height = 240;
@@ -326,7 +318,7 @@ namespace erizo {
 
   //    context_->streams[0] = video_st;
   //   context_->streams[1] = audio_st;
-      aviores_ = avio_open(&context_->pb, context_->filename, AVIO_FLAG_WRITE);
+      aviores_ = avio_open2(&context_->pb, context_->filename, AVIO_FLAG_WRITE);
       if (aviores_<0){
         ELOG_ERROR("Error opening output file AVIO_OPEN %d",aviores_);
         return false;
