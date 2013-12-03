@@ -8,6 +8,7 @@
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/timeb.h>
 
 namespace erizo {
 #define FIR_INTERVAL_MS 4000
