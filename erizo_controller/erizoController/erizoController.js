@@ -371,10 +371,11 @@ var listen = function () {
               return;
           }
           var streamId = options.to;
-          var url = options.url;
-          logger.info("erizoController.js: Starting recorder streamID " + streamId + " url " + url);
+          var username = options.name;
+          var room = options.room;
+          logger.info("erizoController.js: Starting recorder streamID " + streamId + ", for user " + name + " in room " + room);
             if (socket.room.streams[streamId].hasAudio() || socket.room.streams[streamId].hasVideo() || socket.room.streams[streamId].hasScreen()) {
-                socket.room.webRtcController.addExternalOutput(streamId, url);
+                socket.room.webRtcController.addExternalOutput(streamId, username, room);
                 logger.info("erizoController.js: Recorder Started");
             }
         });
@@ -384,8 +385,8 @@ var listen = function () {
               callback('error', 'unauthorized');
               return;
           }
-          logger.info("erizoController.js: Stoping recorder to streamId " + options.to + " url " + options.url);
-          socket.room.webRtcController.removeExternalOutput(options.to, options.url);
+          logger.info("erizoController.js: Stoping recorder to streamId " + options.to + ", for user " + options.name + " in room " + options.room);
+          socket.room.webRtcController.removeExternalOutput(options.to, options.name, options.room);
         });
 
         //Gets 'unpublish' messages on the socket in order to remove a stream from the room.
