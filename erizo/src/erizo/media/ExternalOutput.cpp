@@ -51,7 +51,7 @@ namespace erizo {
       return false;
     }
 
-    path += "/"+room+"/";
+    path += room+"/";
     struct stat st = {0};
 
     if (stat(path.c_str(), &st) == -1) {
@@ -63,7 +63,7 @@ namespace erizo {
 //  oformat_ = av_guess_format(NULL,  url.c_str(), NULL);
     oformat_ = av_guess_format("webm", NULL, NULL);
     if (!oformat_){
-      ELOG_ERROR("Error opening output file");
+      ELOG_ERROR("Error opening output file OFORMAT");
       return false;
     }
     context_->oformat = oformat_;
@@ -87,6 +87,7 @@ namespace erizo {
 	c = snprintf(timestmp_string2, n2+1, "%lu", timestmp_Mill);
 
  	globalpath = globalpath +"_"+timestmp_string1+timestmp_string2+".webm";
+ 	std::out("saved file path is %s",globalpath);
   	snprintf(context_->filename, sizeof(context_->filename), globalpath.c_str());
   	/* meetecho code */
 
@@ -320,7 +321,7 @@ namespace erizo {
       context_->streams[1] = audio_st;
       aviores_ = avio_open(&context_->pb, &context_->filename[0], AVIO_FLAG_WRITE);
       if (aviores_<0){
-        ELOG_ERROR("Error opening output file");
+        ELOG_ERROR("Error opening output file AVIO_OPEN");
         return false;
       }
       writeheadres_ = avformat_write_header(context_, NULL);
