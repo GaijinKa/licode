@@ -218,6 +218,7 @@ namespace erizo {
         thecandidate->component_id = cinfo.componentId;
         thecandidate->priority = cinfo.priority;
         thecandidate->transport = NICE_CANDIDATE_TRANSPORT_UDP;
+	    nice_agent_set_remote_credentials(agent_, (guint) 1, thecandidate->username, thecandidate->password);
         candList = g_slist_append(candList, thecandidate);
         ELOG_DEBUG("New Candidate SET %s %d", cinfo.hostAddress.c_str(), cinfo.hostPort);
 

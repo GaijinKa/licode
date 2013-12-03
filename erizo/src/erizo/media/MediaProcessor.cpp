@@ -288,7 +288,7 @@ namespace erizo {
     if (head->getMarker()) {
       *estimatedFps = 0;
       if (lastVideoTs_){
-        *estimatedFps = 100000/(head->getTimestamp() - lastVideoTs_);
+        *estimatedFps = 90000/(head->getTimestamp() - lastVideoTs_);
       }
       lastVideoTs_ = head->getTimestamp();
       *gotFrame = 1;

@@ -36,7 +36,10 @@ namespace erizo {
     fbSink_ = NULL;
   }
 
-  bool ExternalOutput::init(){
+  bool ExternalOutput::init(std::string path, std::string name, std::string room){
+
+	std::cout << "Init Recorder" << std::endl;
+
     av_register_all();
     avcodec_register_all();
     context_ = avformat_alloc_context();
@@ -44,7 +47,18 @@ namespace erizo {
       ELOG_ERROR("Error allocating memory for IO context");
       return false;
     }
-    oformat_ = av_guess_format(NULL,  url.c_str(), NULL);
+
+    path += "/"+room+"/";
+    struct stat st = {0};
+
+    if (stat(path.c_str(), &st) == -1) {
+    	std::cout << "Recording directory " << path << " not exist, creating... " << std::endl;
+    	mkdir(path.c_str(), 0755);
+    }
+    globalpath = path+name;
+
+//  oformat_ = av_guess_format(NULL,  url.c_str(), NULL);
+    oformat_ = av_guess_format("webm", NULL, NULL);
     if (!oformat_){
       ELOG_ERROR("Error opening output file %s", url.c_str());
       return false;
@@ -52,7 +66,28 @@ namespace erizo {
     context_->oformat = oformat_;
     context_->oformat->video_codec = AV_CODEC_ID_VP8;
     context_->oformat->audio_codec = AV_CODEC_ID_PCM_MULAW;
-    url.copy(context_->filename, sizeof(context_->filename),0);
+
+    /*start meetecho code*/
+    context_->oformat->flags |= AVFMT_TS_NONSTRICT;
+
+	struct timeb tmb;
+	ftime(&tmb);
+	unsigned long int timestmp_Sec =  tmb.time;
+	unsigned short int timestmp_Mill = tmb.millitm;
+	if (timestmp_Mill<100) timestmp_Mill += 99;
+        const int n1 = snprintf(NULL, 0, "%lu", timestmp_Sec);
+        char timestmp_string1[n1+1];
+        int c = snprintf(timestmp_string1, n1+1, "%lu", timestmp_Sec);
+
+	const int n2 = snprintf(NULL, 0, "%lu", timestmp_Mill);
+	char timestmp_string2[n2+1];
+	c = snprintf(timestmp_string2, n2+1, "%lu", timestmp_Mill);
+
+ 	globalpath = globalpath +"_"+timestmp_string1+timestmp_string2+".webm";
+  	snprintf(context_->filename, sizeof(context_->filename), globalpath.c_str());
+  	/* meetecho code */
+
+//  url.copy(context_->filename, sizeof(context_->filename),0);
     video_st = NULL;
     audio_st = NULL;
     in = new InputProcessor();
@@ -212,13 +247,10 @@ namespace erizo {
         ELOG_ERROR("Unpackaged size bigget than buffer %d", unpackagedSize_);
       }
       if (gotUnpackagedFrame_ && videoCodec_!=NULL) {
-        timeval time;
-        gettimeofday(&time, NULL);
-        unsigned long long millis = (time.tv_sec * 1000) + (time.tv_usec / 1000);
         if (initTime_ == 0) {
-          initTime_ = millis;
+          initTime_ = head->timestamp;
         }
-        if (millis < initTime_)
+        if (head->timestamp < initTime_)
         {
           ELOG_WARN("initTime is smaller than currentTime, possible problems when recording ");
         }
@@ -228,7 +260,7 @@ namespace erizo {
         av_init_packet(&avpkt);
         avpkt.data = unpackagedBufferpart_;
         avpkt.size = unpackagedSize_;
-        avpkt.pts = millis - initTime_;
+        avpkt.pts = head->timestamp;
         avpkt.stream_index = 0;
         av_write_frame(context_, &avpkt);
         av_free_packet(&avpkt);
@@ -254,8 +286,8 @@ namespace erizo {
       video_st->id = 0;
       videoCodecCtx_ = video_st->codec;
       videoCodecCtx_->codec_id = oformat_->video_codec;
-      videoCodecCtx_->width = 640;
-      videoCodecCtx_->height = 480;
+      videoCodecCtx_->width = 320;
+      videoCodecCtx_->height = 240;
       videoCodecCtx_->time_base = (AVRational){1,(int)prevEstimatedFps_};
       videoCodecCtx_->pix_fmt = PIX_FMT_YUV420P;
       if (oformat_->flags & AVFMT_GLOBALHEADER){

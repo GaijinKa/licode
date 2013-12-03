@@ -25,9 +25,9 @@ namespace erizo{
     public:
       ExternalOutput (std::string outputUrl);
       virtual ~ExternalOutput();
-      bool init();
-	    int deliverAudioData(char* buf, int len);
-	    int deliverVideoData(char* buf, int len);
+      bool init(const std::string path, const std::string name, const std::string room);
+      int deliverAudioData(char* buf, int len);
+	  int deliverVideoData(char* buf, int len);
       void receiveRawData(RawDataPacket& packet);
 
     private:
@@ -38,9 +38,10 @@ namespace erizo{
       int sendFirPacket();
       void encodeLoop();
 
-      std::string url;
       bool running;
-	    boost::mutex queueMutex_;
+
+      struct timeval tv;
+      boost::mutex queueMutex_;
       boost::thread thread_, encodeThread_;
       std::queue<RawDataPacket> packetQueue_;
       AVStream        *video_st, *audio_st;
@@ -69,6 +70,7 @@ namespace erizo{
       unsigned char unpackagedBuffer_[UNPACKAGE_BUFFER_SIZE];
       unsigned char unpackagedAudioBuffer_[UNPACKAGE_BUFFER_SIZE/10];
       unsigned long long initTime_;
+      std::string globalpath;
   };
 }
 #endif /* EXTERNALOUTPUT_H_ */
