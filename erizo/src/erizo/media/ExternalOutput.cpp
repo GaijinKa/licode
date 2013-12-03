@@ -61,7 +61,7 @@ namespace erizo {
     globalpath = path+name;
 
 //  oformat_ = av_guess_format(NULL,  url.c_str(), NULL);
-    oformat_ = av_guess_format("webm", NULL, NULL);
+    oformat_ = av_guess_format(NULL, globalpath.c_str(), NULL);
     if (!oformat_){
       ELOG_ERROR("Error opening output file OFORMAT");
       return false;
