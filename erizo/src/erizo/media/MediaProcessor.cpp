@@ -291,8 +291,6 @@ namespace erizo {
 
     if (tempKeyFrame) {
     	ELOG_WARN("GOT KEYFRAME");
-    } else {
-    	ELOG_WARN("NO KEYFRAME");
     }
 
     *KFrame = tempKeyFrame;

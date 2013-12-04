@@ -34,8 +34,8 @@ namespace erizo {
     writeheadres_=-1;
     unpackagedBufferpart_ = unpackagedBuffer_;
     initTime_ = 0;
-    lastTime_ = 0;
-
+    lastTs_ = 0;
+    lastKeyFrame = 0;
     sinkfbSource_ = this;
     fbSink_ = NULL;
   }
@@ -256,13 +256,13 @@ namespace erizo {
           initTime_ = videoTs_;
           this->sendFirPacket();
         }
-        if (videoTs_ < initTime_)
+
+        if (videoTs_ < lastTs_)
         {
           ELOG_WARN("initTime is smaller than currentTime, possible problems when recording ");
-        } else
-           ELOG_WARN("Frame pts %f ", (videoTs_-initTime_)/90);
+        }
 
-        if ((videoTs_ - initTime_)/90 > FIR_INTERVAL_MS) {
+        if ((videoTs_ - lastKeyFrame)/90 > FIR_INTERVAL_MS) {
         	this->sendFirPacket();
         	ELOG_WARN("Too much time from last FIR, resend FIR PACKET");
         }
@@ -277,6 +277,7 @@ namespace erizo {
         avpkt.stream_index = 0;
         if(KFrame) {
         	avpkt.flags |= AV_PKT_FLAG_KEY;
+        	lastKeyFrame = videoTs_;
             ELOG_WARN("KEYFRAME");
         }
         av_write_frame(context_, &avpkt);
@@ -284,7 +285,7 @@ namespace erizo {
         gotUnpackagedFrame_ = 0;
         unpackagedSize_ = 0;
         unpackagedBufferpart_ = unpackagedBuffer_;
-
+        lastTs_ = videoTs_;
       }
     }
     return 0;
