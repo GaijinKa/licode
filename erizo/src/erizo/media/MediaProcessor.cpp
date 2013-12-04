@@ -259,7 +259,7 @@ namespace erizo {
   }
 
   int InputProcessor::unpackageVideo(unsigned char* inBuff, int inBuffLen,
-      unsigned char* outBuff, int* gotFrame, int* estimatedFps) {
+      unsigned char* outBuff, int* gotFrame, int* estimatedFps, int* videoTs) {
 
     if (videoUnpackager == 0) {
       ELOG_DEBUG("Unpackager not correctly initialized");
@@ -291,6 +291,7 @@ namespace erizo {
         *estimatedFps = 90000/(head->getTimestamp() - lastVideoTs_);
       }
       lastVideoTs_ = head->getTimestamp();
+      *videoTs = lastVideoTs_;
       ELOG_DEBUG("For unpackager video TS is %f",lastVideoTs_);
       *gotFrame = 1;
     }
