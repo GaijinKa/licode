@@ -295,6 +295,7 @@ namespace erizo {
       ELOG_DEBUG("For unpackager video TS is %f",lastVideoTs_);
       *gotFrame = 1;
     }
+
     int ret = parsed->dataLength;
     delete parsed;
     return ret;
