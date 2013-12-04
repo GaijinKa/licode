@@ -21,6 +21,7 @@ namespace erizo {
     gotUnpackagedFrame_ = false;
     upackagedSize_ = 0;
     decodedBuffer_ = NULL;
+    tempKeyFrame = false;
 
     av_register_all();
   }
@@ -268,11 +269,11 @@ namespace erizo {
       ELOG_DEBUG("Unpackager not correctly initialized");
       return -1;
     }
+    bool tempKeyFrame_2 = false;
 
     int inBuffOffset = 0;
     *gotFrame = 0;
     RTPHeader* head = reinterpret_cast<RTPHeader*>(inBuff);
-    bool tempKeyFrame = false;
 
     //head->getMarker());
     //    if ( head->getSSRC() != 55543 /*&& head->payloadtype!=101*/) {
@@ -286,8 +287,11 @@ namespace erizo {
     inBuffOffset+=head->getHeaderLength();
 
     erizo::RTPPayloadVP8* parsed = pars.parseVP8(
-        (unsigned char*) &inBuff[inBuffOffset], l, &tempKeyFrame);
+        (unsigned char*) &inBuff[inBuffOffset], l, &tempKeyFrame2);
     memcpy(outBuff, parsed->data, parsed->dataLength);
+
+    if (tempKeyFrame2)
+    	tempKeyFrame = true;
 
     if (tempKeyFrame) {
     	ELOG_WARN("GOT KEYFRAME");
@@ -303,7 +307,7 @@ namespace erizo {
       lastVideoTs_ = head->getTimestamp();
       *videoTs = lastVideoTs_;
       *gotFrame = 1;
-
+      tempKeyFrame = false;
     }
 
     int ret = parsed->dataLength;

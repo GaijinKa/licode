@@ -108,6 +108,7 @@ private:
 	int videoDecoder;
 
     double lastVideoTs_;
+    bool tempKeyFrame;
 
 	MediaInfo mediaInfo;
 
