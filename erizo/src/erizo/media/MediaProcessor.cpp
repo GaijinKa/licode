@@ -289,7 +289,7 @@ namespace erizo {
         (unsigned char*) &inBuff[inBuffOffset], l, &tempKeyFrame);
     memcpy(outBuff, parsed->data, parsed->dataLength);
 
-    KFrame = tempKeyFrame;
+    *KFrame = tempKeyFrame;
 
     if (head->getMarker()) {
       *estimatedFps = 0;
