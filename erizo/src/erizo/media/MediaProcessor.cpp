@@ -282,6 +282,7 @@ namespace erizo {
     int l = inBuffLen - head->getHeaderLength();
     inBuffOffset+=head->getHeaderLength();
 
+
     erizo::RTPPayloadVP8* parsed = pars.parseVP8(
         (unsigned char*) &inBuff[inBuffOffset], l);
     memcpy(outBuff, parsed->data, parsed->dataLength);

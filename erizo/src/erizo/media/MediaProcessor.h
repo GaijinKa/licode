@@ -92,7 +92,6 @@ public:
 	int deliverAudioData(char* buf, int len);
 	int deliverVideoData(char* buf, int len);
 
-
 	int unpackageVideo(unsigned char* inBuff, int inBuffLen,
 			unsigned char* outBuff, int* gotFrame, int* estimatedFps, int* videoTs);
 
