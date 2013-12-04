@@ -201,6 +201,7 @@ RTPPayloadVP8* RtpParser::parseVP8(unsigned char* data,
 		frametype = (*dataPtr & 0x01) ? "kPFrame" : "kIFrame";
 		*KFrame = (*dataPtr & 0x01) ? false : true;
 	} else {
+
 		*KFrame = false;
 		frametype = "kPFrame";
 	}

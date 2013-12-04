@@ -272,6 +272,7 @@ namespace erizo {
         if(KFrame) {
         	apacket.flags |= AV_PKT_FLAG_KEY;
             ELOG_WARN("KEYFRAME");
+
         }
         av_write_frame(context_, &avpkt);
         av_free_packet(&avpkt);

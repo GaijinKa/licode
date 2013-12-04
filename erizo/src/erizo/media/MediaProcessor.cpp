@@ -297,6 +297,7 @@ namespace erizo {
       lastVideoTs_ = head->getTimestamp();
       *videoTs = lastVideoTs_;
       *gotFrame = 1;
+
     }
 
     int ret = parsed->dataLength;
