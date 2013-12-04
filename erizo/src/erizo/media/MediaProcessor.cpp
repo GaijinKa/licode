@@ -305,6 +305,7 @@ namespace erizo {
     return ret;
   }
 
+
   void InputProcessor::closeSink(){
     this->close();
   }
