@@ -272,7 +272,7 @@ namespace erizo {
     int inBuffOffset = 0;
     *gotFrame = 0;
     RTPHeader* head = reinterpret_cast<RTPHeader*>(inBuff);
-
+    bool tempKeyFrame = false;
 
     //head->getMarker());
     //    if ( head->getSSRC() != 55543 /*&& head->payloadtype!=101*/) {
@@ -286,8 +286,10 @@ namespace erizo {
     inBuffOffset+=head->getHeaderLength();
 
     erizo::RTPPayloadVP8* parsed = pars.parseVP8(
-        (unsigned char*) &inBuff[inBuffOffset], l, &KFrame);
+        (unsigned char*) &inBuff[inBuffOffset], l, &tempKeyFrame);
     memcpy(outBuff, parsed->data, parsed->dataLength);
+
+    KFrame = tempKeyFrame;
 
     if (head->getMarker()) {
       *estimatedFps = 0;
