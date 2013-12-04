@@ -269,7 +269,7 @@ namespace erizo {
       ELOG_DEBUG("Unpackager not correctly initialized");
       return -1;
     }
-    bool tempKeyFrame_2 = false;
+    bool tempKeyFrame2 = false;
 
     int inBuffOffset = 0;
     *gotFrame = 0;
