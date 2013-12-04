@@ -147,7 +147,7 @@ namespace erizo {
 
 
   int ExternalOutput::deliverAudioData(char* buf, int len){
-    if (in!=NULL){
+/*    if (in!=NULL){
       if (videoCodec_ == NULL) {
         return 0;
       }
@@ -187,7 +187,7 @@ namespace erizo {
       av_free_packet(&avpkt);
       return ret;
 
-    }
+    }*/
     return 0;
   }
 
