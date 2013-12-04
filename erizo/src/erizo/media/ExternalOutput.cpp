@@ -264,7 +264,7 @@ namespace erizo {
 
         if ((videoTs_ - lastKeyFrame)/90000 > FIR_INTERVAL_MS) {
         	this->sendFirPacket();
-        	ELOG_WARN("Too much time from last FIR, resend FIR PACKET");
+        	ELOG_WARN("Too much time from last FIR: %d, resend FIR PACKET",(videoTs_ - lastKeyFrame)/90);
         }
 
         unpackagedBufferpart_ -= unpackagedSize_;
@@ -278,7 +278,7 @@ namespace erizo {
         if(KFrame) {
         	avpkt.flags |= AV_PKT_FLAG_KEY;
         	lastKeyFrame = videoTs_;
-            ELOG_WARN("KEYFRAME");
+            ELOG_WARN("KEYFRAME, setting lastKeyframe to %d", lastKeyFrame);
         }
         av_write_frame(context_, &avpkt);
         av_free_packet(&avpkt);
