@@ -306,16 +306,16 @@ namespace erizo {
         ELOG_ERROR("Could not find audio codec");
         return false;
       }
-      audio_st = avformat_new_stream (context_, audioCodec_);
-      audio_st->id = 1;
-      audioCodecCtx_ = audio_st->codec;
-      audioCodecCtx_->codec_id = oformat_->audio_codec;
-      audioCodecCtx_->sample_rate = 8000;
-      audioCodecCtx_->channels = 1;
+      //audio_st = avformat_new_stream (context_, audioCodec_);
+      //audio_st->id = 1;
+      //audioCodecCtx_ = audio_st->codec;
+      //audioCodecCtx_->codec_id = oformat_->audio_codec;
+      //audioCodecCtx_->sample_rate = 8000;
+      //audioCodecCtx_->channels = 1;
       //      audioCodecCtx_->sample_fmt = AV_SAMPLE_FMT_S8;
-      if (oformat_->flags & AVFMT_GLOBALHEADER){
-        audioCodecCtx_->flags|=CODEC_FLAG_GLOBAL_HEADER;
-      }
+      //if (oformat_->flags & AVFMT_GLOBALHEADER){
+      //  audioCodecCtx_->flags|=CODEC_FLAG_GLOBAL_HEADER;
+      //}
 
       context_->streams[0] = video_st;
 //      context_->streams[1] = audio_st;
