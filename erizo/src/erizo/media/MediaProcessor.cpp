@@ -72,8 +72,9 @@ namespace erizo {
   int InputProcessor::deliverVideoData(char* buf, int len) {
     if (videoUnpackager && videoDecoder) {
       int estimatedFps=0;
+      int* videoTs2 = 0;
       int ret = unpackageVideo(reinterpret_cast<unsigned char*>(buf), len,
-          unpackagedBuffer_, &gotUnpackagedFrame_, &estimatedFps);
+          unpackagedBuffer_, &gotUnpackagedFrame_, &estimatedFps, &videoTs2);
       if (ret < 0)
         return 0;
       upackagedSize_ += ret;
