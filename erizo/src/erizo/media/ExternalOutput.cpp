@@ -262,7 +262,7 @@ namespace erizo {
           ELOG_WARN("initTime is smaller than currentTime, possible problems when recording ");
         }
 
-        if ((videoTs_ - lastKeyFrame)/90 > FIR_INTERVAL_MS) {
+        if ((videoTs_ - lastKeyFrame)/90000 > FIR_INTERVAL_MS) {
         	this->sendFirPacket();
         	ELOG_WARN("Too much time from last FIR, resend FIR PACKET");
         }
