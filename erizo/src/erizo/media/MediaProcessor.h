@@ -89,6 +89,7 @@ public:
 
 	int init(const MediaInfo& info, RawDataReceiver* receiver);
 
+
 	int deliverAudioData(char* buf, int len);
 	int deliverVideoData(char* buf, int len);
 

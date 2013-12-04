@@ -54,6 +54,7 @@ namespace erizo{
       int sequenceNumberFIR_;
       unsigned long long lastTime_;
 
+
       int video_stream_index, bufflen, aviores_, writeheadres_;
 
 
