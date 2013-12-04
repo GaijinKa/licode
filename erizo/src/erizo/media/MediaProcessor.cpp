@@ -289,6 +289,10 @@ namespace erizo {
         (unsigned char*) &inBuff[inBuffOffset], l, &tempKeyFrame);
     memcpy(outBuff, parsed->data, parsed->dataLength);
 
+    if (tempKeyFrame)
+    	ELOG_WARN("GOT KEYFRAME");
+    else
+    	ELOG_WARN("NO KEYFRAME");
     *KFrame = tempKeyFrame;
 
     if (head->getMarker()) {

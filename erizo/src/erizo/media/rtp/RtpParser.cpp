@@ -200,7 +200,6 @@ RTPPayloadVP8* RtpParser::parseVP8(unsigned char* data,
 		//parsedPacket.frameType = (*dataPtr & 0x01) ? kPFrame : kIFrame;
 		frametype = (*dataPtr & 0x01) ? "kPFrame" : "kIFrame";
 		*KFrame = (*dataPtr & 0x01) ? false : true;
-		ELOG_WARN("frame type is %d",KFrame);
 	} else {
 		*KFrame = false;
 		frametype = "kPFrame";
