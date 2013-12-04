@@ -286,7 +286,7 @@ namespace erizo {
     inBuffOffset+=head->getHeaderLength();
 
     erizo::RTPPayloadVP8* parsed = pars.parseVP8(
-        (unsigned char*) &inBuff[inBuffOffset], l, KFrame);
+        (unsigned char*) &inBuff[inBuffOffset], l, &KFrame);
     memcpy(outBuff, parsed->data, parsed->dataLength);
 
     if (head->getMarker()) {
