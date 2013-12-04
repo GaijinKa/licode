@@ -120,24 +120,29 @@ namespace erizo {
     ELOG_DEBUG("Destructor");
     ELOG_DEBUG("Closing Sink");
     delete in;
+    ELOG_DEBUG("Deleted in");
     in = NULL;
-    
+    ELOG_DEBUG("Nullify in");
+
     if (context_!=NULL){
+      ELOG_DEBUG("WRITING TRAILER");
       if (writeheadres_>=0)
         av_write_trailer(context_);
       if (avio_close>=0)
         avio_close(context_->pb);
+      ELOG_DEBUG("AVIO CLOSED");
       avformat_free_context(context_);
+      ELOG_DEBUG("AVFORMAT FREE");
       context_=NULL;
     }
     if (videoCodec_!=NULL){
       avcodec_close(videoCodecCtx_);
       videoCodec_=NULL;
     }
-    if (audioCodec_!=NULL){
-      avcodec_close(audioCodecCtx_);
-      audioCodec_ = NULL;
-    }
+//    if (audioCodec_!=NULL){
+//      avcodec_close(audioCodecCtx_);
+//      audioCodec_ = NULL;
+//    }
     ELOG_DEBUG("ExternalOutput closed Successfully");
     return;
   }
