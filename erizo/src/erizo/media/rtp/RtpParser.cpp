@@ -158,7 +158,7 @@ int ParseVP8Extension(erizo::RTPPayloadVP8* vp8, const unsigned char* dataPtr, i
 }
 
 RTPPayloadVP8* RtpParser::parseVP8(unsigned char* data,
-		int dataLength) {
+		int dataLength, bool* KFrame) {
 	//ELOG_DEBUG("Parsing VP8 %d bytes", dataLength);
 	RTPPayloadVP8* vp8 = new RTPPayloadVP8; // = &parsedPacket.info.VP8;
 	const unsigned char* dataPtr = data;
@@ -198,10 +198,10 @@ RTPPayloadVP8* RtpParser::parseVP8(unsigned char* data,
 	// Read P bit from payload header (only at beginning of first partition)
 	if (dataLength > 0 && vp8->beginningOfPartition && vp8->partitionID == 0) {
 		//parsedPacket.frameType = (*dataPtr & 0x01) ? kPFrame : kIFrame;
-		frametype = (*dataPtr & 0x01) ? "kPFrame" : "kIFrame";
+		frameType = (*dataPtr & 0x01) ? "kPFrame" : "kIFrame";
 	} else {
 
-		frametype = "kPFrame";
+		frameType = "kPFrame";
 	}
 //  if (0 != ParseVP8FrameSize(parsedPacket, dataPtr, dataLength)) {
 //    return *vp8;

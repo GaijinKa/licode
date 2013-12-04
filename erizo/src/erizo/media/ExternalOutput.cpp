@@ -25,6 +25,7 @@ namespace erizo {
     audioCodec_ = NULL;
     video_st = NULL;
     audio_st = NULL;
+    KFrame = false;
     audioCoder_ = NULL;
     prevEstimatedFps_ = 0;
     warmupfpsCount_ = 0;
@@ -223,7 +224,7 @@ namespace erizo {
       }
       int estimatedFps=0;
       int ret = in->unpackageVideo(reinterpret_cast<unsigned char*>(buf), len,
-          unpackagedBufferpart_, &gotUnpackagedFrame_, &estimatedFps, &videoTs_);
+          unpackagedBufferpart_, &gotUnpackagedFrame_, &estimatedFps, &videoTs_, &KFrame);
 
       if (ret < 0)
         return 0;
@@ -257,15 +258,19 @@ namespace erizo {
         if (videoTs_ < initTime_)
         {
           ELOG_WARN("initTime is smaller than currentTime, possible problems when recording ");
-        }
+        } else
+           ELOG_WARN("Frame pts %f ", (videoTs_-initTime_)/90);
+
         unpackagedBufferpart_ -= unpackagedSize_;
 
         AVPacket avpkt;
         av_init_packet(&avpkt);
         avpkt.data = unpackagedBufferpart_;
         avpkt.size = unpackagedSize_;
-        avpkt.pts = videoTs_ - initTime_;
+        avpkt.pts = (videoTs_ - initTime_)/90;
         avpkt.stream_index = 0;
+        if(KFrame)
+        	apacket.flags |= AV_PKT_FLAG_KEY;
         av_write_frame(context_, &avpkt);
         av_free_packet(&avpkt);
         gotUnpackagedFrame_ = 0;

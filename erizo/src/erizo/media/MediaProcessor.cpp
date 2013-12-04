@@ -73,10 +73,10 @@ namespace erizo {
     if (videoUnpackager && videoDecoder) {
       int estimatedFps=0;
       double videoTs2 = 0;
-
+      bool fKframe = false;
 
       int ret = unpackageVideo(reinterpret_cast<unsigned char*>(buf), len,
-          unpackagedBuffer_, &gotUnpackagedFrame_, &estimatedFps, &videoTs2);
+          unpackagedBuffer_, &gotUnpackagedFrame_, &estimatedFps, &videoTs2, &fKframe);
       if (ret < 0)
         return 0;
       upackagedSize_ += ret;
@@ -262,7 +262,7 @@ namespace erizo {
   }
 
   int InputProcessor::unpackageVideo(unsigned char* inBuff, int inBuffLen,
-      unsigned char* outBuff, int* gotFrame, int* estimatedFps, double* videoTs) {
+      unsigned char* outBuff, int* gotFrame, int* estimatedFps, double* videoTs, bool* KFrame) {
 
     if (videoUnpackager == 0) {
       ELOG_DEBUG("Unpackager not correctly initialized");
@@ -285,10 +285,10 @@ namespace erizo {
     int l = inBuffLen - head->getHeaderLength();
     inBuffOffset+=head->getHeaderLength();
 
-
     erizo::RTPPayloadVP8* parsed = pars.parseVP8(
-        (unsigned char*) &inBuff[inBuffOffset], l);
+        (unsigned char*) &inBuff[inBuffOffset], l, KFrame);
     memcpy(outBuff, parsed->data, parsed->dataLength);
+
     if (head->getMarker()) {
       *estimatedFps = 0;
       if (lastVideoTs_){
@@ -296,8 +296,8 @@ namespace erizo {
       }
       lastVideoTs_ = head->getTimestamp();
       *videoTs = lastVideoTs_;
-      ELOG_DEBUG("For unpackager video TS is %f",lastVideoTs_);
       *gotFrame = 1;
+      keyFrame = 0;
     }
 
     int ret = parsed->dataLength;

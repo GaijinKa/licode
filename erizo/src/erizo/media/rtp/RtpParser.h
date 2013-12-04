@@ -35,7 +35,7 @@ class RtpParser {
 public:
 	RtpParser();
 	virtual ~RtpParser();
-	erizo::RTPPayloadVP8* parseVP8(unsigned char* data, int datalength);
+	erizo::RTPPayloadVP8* parseVP8(unsigned char* data, int datalength, bool* KFrame);
 };
 
 } /* namespace erizo */
