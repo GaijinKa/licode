@@ -52,7 +52,7 @@ namespace erizo{
       int prevEstimatedFps_;
       int warmupfpsCount_;
       int sequenceNumberFIR_;
-      unsigned long long lastTime_;
+//      unsigned long long lastTime_;
       bool KFrame;
       double lastKeyFrame, lastTs;
       int video_stream_index, bufflen, aviores_, writeheadres_;

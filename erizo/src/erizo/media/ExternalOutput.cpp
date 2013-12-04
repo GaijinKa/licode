@@ -34,7 +34,7 @@ namespace erizo {
     writeheadres_=-1;
     unpackagedBufferpart_ = unpackagedBuffer_;
     initTime_ = 0;
-    lastTs_ = 0;
+    lastTs = 0;
     lastKeyFrame = 0;
     sinkfbSource_ = this;
     fbSink_ = NULL;
@@ -257,7 +257,7 @@ namespace erizo {
           this->sendFirPacket();
         }
 
-        if (videoTs_ < lastTs_)
+        if (videoTs_ < lastTs)
         {
           ELOG_WARN("initTime is smaller than currentTime, possible problems when recording ");
         }
@@ -285,7 +285,7 @@ namespace erizo {
         gotUnpackagedFrame_ = 0;
         unpackagedSize_ = 0;
         unpackagedBufferpart_ = unpackagedBuffer_;
-        lastTs_ = videoTs_;
+        lastTs = videoTs_;
       }
     }
     return 0;
