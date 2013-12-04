@@ -262,7 +262,7 @@ namespace erizo {
   }
 
   int InputProcessor::unpackageVideo(unsigned char* inBuff, int inBuffLen,
-      unsigned char* outBuff, int* gotFrame, int* estimatedFps, int* videoTs) {
+      unsigned char* outBuff, int* gotFrame, int* estimatedFps, double* videoTs) {
 
     if (videoUnpackager == 0) {
       ELOG_DEBUG("Unpackager not correctly initialized");
