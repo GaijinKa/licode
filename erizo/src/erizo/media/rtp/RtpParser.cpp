@@ -198,10 +198,11 @@ RTPPayloadVP8* RtpParser::parseVP8(unsigned char* data,
 	// Read P bit from payload header (only at beginning of first partition)
 	if (dataLength > 0 && vp8->beginningOfPartition && vp8->partitionID == 0) {
 		//parsedPacket.frameType = (*dataPtr & 0x01) ? kPFrame : kIFrame;
-		frameType = (*dataPtr & 0x01) ? "kPFrame" : "kIFrame";
+		frametype = (*dataPtr & 0x01) ? "kPFrame" : "kIFrame";
+		*KFrame = (*dataPtr & 0x01) ? false : true;
 	} else {
-
-		frameType = "kPFrame";
+		*KFrame = false;
+		frametype = "kPFrame";
 	}
 //  if (0 != ParseVP8FrameSize(parsedPacket, dataPtr, dataLength)) {
 //    return *vp8;
