@@ -269,8 +269,10 @@ namespace erizo {
         avpkt.size = unpackagedSize_;
         avpkt.pts = (videoTs_ - initTime_)/90;
         avpkt.stream_index = 0;
-        if(KFrame)
+        if(KFrame) {
         	apacket.flags |= AV_PKT_FLAG_KEY;
+            ELOG_WARN("KEYFRAME");
+        }
         av_write_frame(context_, &avpkt);
         av_free_packet(&avpkt);
         gotUnpackagedFrame_ = 0;
