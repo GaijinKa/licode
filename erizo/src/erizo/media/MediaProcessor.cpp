@@ -291,7 +291,7 @@ namespace erizo {
         *estimatedFps = 90000/(head->getTimestamp() - lastVideoTs_);
       }
       lastVideoTs_ = head->getTimestamp();
-      ELOG_DEBUG("For unpackager video TS is %d",lastVideoTs_);
+      ELOG_DEBUG("For unpackager video TS is %f",lastVideoTs_);
       *gotFrame = 1;
     }
     int ret = parsed->dataLength;
