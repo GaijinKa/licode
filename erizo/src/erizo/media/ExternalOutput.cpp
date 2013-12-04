@@ -254,12 +254,18 @@ namespace erizo {
       if (gotUnpackagedFrame_ && videoCodec_!=NULL) {
         if (initTime_ == 0) {
           initTime_ = videoTs_;
+          this->sendFirPacket();
         }
         if (videoTs_ < initTime_)
         {
           ELOG_WARN("initTime is smaller than currentTime, possible problems when recording ");
         } else
            ELOG_WARN("Frame pts %f ", (videoTs_-initTime_)/90);
+
+        if ((videoTs_ - initTime_)/90 > FIR_INTERVAL_MS) {
+        	this->sendFirPacket();
+        	ELOG_WARN("Too much time from last FIR, resend FIR PACKET");
+        }
 
         unpackagedBufferpart_ -= unpackagedSize_;
 
