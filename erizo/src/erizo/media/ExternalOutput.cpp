@@ -68,7 +68,7 @@ namespace erizo {
     }
     context_->oformat = oformat_;
     context_->oformat->video_codec = AV_CODEC_ID_VP8;
-//    context_->oformat->audio_codec = AV_CODEC_ID_VORBIS;
+    context_->oformat->audio_codec = AV_CODEC_ID_VORBIS;
 
     /*start meetecho code*/
     context_->oformat->flags |= AVFMT_TS_NONSTRICT;
@@ -318,7 +318,7 @@ namespace erizo {
       }
 
       context_->streams[0] = video_st;
-  //    context_->streams[1] = audio_st;
+      context_->streams[1] = audio_st;
       aviores_ = avio_open(&context_->pb, context_->filename, AVIO_FLAG_WRITE);
       if (aviores_<0){
         ELOG_ERROR("Error opening output file");
@@ -326,7 +326,7 @@ namespace erizo {
       }
       writeheadres_ = avformat_write_header(context_, NULL);
       if (writeheadres_<0){
-        ELOG_ERROR("Error writing header");
+        ELOG_ERROR("Error writing header %d",writeheadres_);
         return false;
       }
       ELOG_DEBUG("AVFORMAT CONFIGURED");
