@@ -306,6 +306,7 @@ namespace erizo {
         ELOG_ERROR("Could not find audio codec");
         return false;
       }
+
       //audio_st = avformat_new_stream (context_, audioCodec_);
       //audio_st->id = 1;
       //audioCodecCtx_ = audio_st->codec;
