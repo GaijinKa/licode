@@ -413,6 +413,7 @@ Erizo.Room = function (spec) {
             if ((stream.hasAudio() || stream.hasVideo() || stream.hasScreen()) && stream.url === undefined) {
                 stream.pc.close();
                 stream.pc = undefined;
+                stream.showOverlay();
             }
             delete that.localStreams[stream.getID()];
 
