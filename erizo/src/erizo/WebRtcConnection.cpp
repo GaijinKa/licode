@@ -55,7 +55,7 @@ namespace erizo {
     stunPort_ = stunPort;
     minPort_ = minPort;
     maxPort_ = maxPort;
-    maxVideoBitRate_ = 300000;
+    maxVideoBitRate_ = 128000;
   }
 
   WebRtcConnection::~WebRtcConnection() {
