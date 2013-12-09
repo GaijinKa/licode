@@ -310,6 +310,7 @@ namespace erizo {
     rtcpPacket[pos++] = (uint8_t) 0;
     rtcpPacket[pos++] = (uint8_t) 0;
     rtcpPacket[pos++] = (uint8_t) 0;
+
     // Additional Feedback Control Information (FCI)
     uint32_t* ptr2 = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
     ptr2[0] = htonl(this->getVideoSourceSSRC());
@@ -325,6 +326,63 @@ namespace erizo {
     }
 
     return pos;
+  }
+
+
+  int WebRtcConnection::sendRembPacket(uint32_t bitrate) {
+	  ELOG_DEBUG("Generating REMB Packet (bitrate=" + bitrate + ")");
+   int pos = 0;
+   uint8_t rtcpPacket[50];
+   // add REMB (pt=205, fmt=15)
+   uint8_t FMT = 15;
+   rtcpPacket[pos++] = (uint8_t) 0x80 + FMT;
+   rtcpPacket[pos++] = (uint8_t) 206;
+
+   //Length of 5
+   rtcpPacket[pos++] = (uint8_t) 0;
+   rtcpPacket[pos++] = (uint8_t) (5);
+
+   // Add our own SSRC
+   uint32_t* ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
+   ptr[0] = htonl(this->getVideoSinkSSRC());
+   pos += 4;
+
+   rtcpPacket[pos++] = (uint8_t) 0;
+   rtcpPacket[pos++] = (uint8_t) 0;
+   rtcpPacket[pos++] = (uint8_t) 0;
+   rtcpPacket[pos++] = (uint8_t) 0;
+
+   rtcpPacket[pos++] = 'R';
+   rtcpPacket[pos++] = 'E';
+   rtcpPacket[pos++] = 'M';
+   rtcpPacket[pos++] = 'B';
+
+      rtcpPacket[pos++] = (uint8_t) 1;
+      // 6 bit Exp
+      // 18 bit mantissa
+      uint8_t brExp = 0;
+      for(uint32_t i=0; i<64; i++)
+      {
+          if(bitrate <= ((uint32_t)262143 << i))
+          {
+              brExp = i;
+              break;
+          }
+      }
+      const uint32_t brMantissa = (bitrate >> brExp);
+      rtcpPacket[pos++]=(uint8_t)((brExp << 2) + ((brMantissa >> 16) & 0x03));
+      rtcpPacket[pos++]=(uint8_t)(brMantissa >> 8);
+      rtcpPacket[pos++]=(uint8_t)(brMantissa);
+
+   uint32_t* ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
+   ptr[0] = htonl(this->getVideoSinkSSRC());
+   pos += 4;
+
+   if (videoTransport_ != NULL) {
+    videoTransport_->write((char*)rtcpPacket, pos);
+   }
+
+   return pos;
   }
 
   void WebRtcConnection::setWebRTCConnectionStateListener(

@@ -64,6 +64,7 @@ Erizo.ChromeCanaryStack = function (spec) {
     //L.Logger.debug("Created webkitRTCPeerConnnection with config \"" + JSON.stringify(that.pc_config) + "\".");
 
     var setMaxBW = function (sdp) {
+		console.log("MAXVIDEOBW IS", spec.maxVideoBW);
         if (spec.maxVideoBW) {
             var a = sdp.match(/m=video.*\r\n/);
             var r = a[0] + "b=AS:" + spec.maxVideoBW + "\r\n";
@@ -121,9 +122,9 @@ Erizo.ChromeCanaryStack = function (spec) {
                     sdp: msg.sdp,
                     type: 'answer'
                 };
-                L.Logger.debug("Received ANSWER: ", sd.sdp);
-
+				
                 sd.sdp = setMaxBW(sd.sdp);
+                L.Logger.debug("Received ANSWER: ", sd.sdp);
 
                 that.peerConnection.setRemoteDescription(new RTCSessionDescription(sd));
                 that.sendOK();
