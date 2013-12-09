@@ -98,7 +98,7 @@ namespace erizo {
 
     ELOG_DEBUG("Video %d videossrc %u Audio %d audio ssrc %u Bundle %d", video_, remoteSdp_.videoSsrc, audio_, remoteSdp_.audioSsrc,  bundle_);
 
-    ELOG_DEBUG("Setting SSRC to localSdp %u", this->getVideoSinkSSRC());
+    ELOG_INFO("Setting SSRC to localSdp %u", this->getVideoSinkSSRC());
     localSdp_.videoSsrc = this->getVideoSinkSSRC();
     localSdp_.audioSsrc = this->getAudioSinkSSRC();
 
