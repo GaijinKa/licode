@@ -362,14 +362,16 @@ namespace erizo {
 
    // Add our own SSRC
    ELOG_INFO("REMB PACKET : SENDERSSRC");
+   uint32_t* ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
+   ptr[0] = htonl(this->getVideoSinkSSRC());
+   pos += 4;
+
    printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-4]));
    printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-3]));
    printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-2]));
    printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
 
-   uint32_t* ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
-   ptr[0] = htonl(this->getVideoSinkSSRC());
-   pos += 4;
+
    ELOG_INFO("REMB PACKET : VIDEOSINKSSRC");
    rtcpPacket[pos++] = (uint8_t) 0;
    printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
