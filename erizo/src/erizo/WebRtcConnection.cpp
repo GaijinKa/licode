@@ -433,7 +433,6 @@ namespace erizo {
       if (state == TRANSPORT_STARTED) {
         videoTransport_->setRemoteCandidates(remoteSdp_.getCandidateInfos());
         temp = STARTED;
-        this->sendRembPacket(maxVideoBitRate_);
       }
       if (state == TRANSPORT_READY) {
         temp = READY;
@@ -442,6 +441,7 @@ namespace erizo {
 
     if (temp == READY && globalState_ != temp) {
       ELOG_INFO("Ready to send and receive media");
+      this->sendRembPacket(maxVideoBitRate_);
     }
 
     if (audioTransport_ != NULL && videoTransport_ != NULL) {
