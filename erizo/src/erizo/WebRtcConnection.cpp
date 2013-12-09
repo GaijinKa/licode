@@ -337,11 +337,15 @@ namespace erizo {
    // add REMB (pt=206, fmt=15)
    uint8_t FMT = 15;
    rtcpPacket[pos++] = (uint8_t) 0x80 + FMT;
+   ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos]);
    rtcpPacket[pos++] = (uint8_t) 206;
+   ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos]);
 
    //Length of 5
    rtcpPacket[pos++] = (uint8_t) 0;
+   ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos]);
    rtcpPacket[pos++] = (uint8_t) (5);
+   ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos]);
 
    // Add our own SSRC
    uint32_t* ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
@@ -349,16 +353,25 @@ namespace erizo {
    pos += 4;
 
    rtcpPacket[pos++] = (uint8_t) 0;
+   ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos]);
    rtcpPacket[pos++] = (uint8_t) 0;
+   ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos]);
    rtcpPacket[pos++] = (uint8_t) 0;
+   ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos]);
    rtcpPacket[pos++] = (uint8_t) 0;
+   ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos]);
 
    rtcpPacket[pos++] = 'R';
+   ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos]);
    rtcpPacket[pos++] = 'E';
+   ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos]);
    rtcpPacket[pos++] = 'M';
+   ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos]);
    rtcpPacket[pos++] = 'B';
+   ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos]);
 
       rtcpPacket[pos++] = (uint8_t) 1;
+      ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos]);
       // 6 bit Exp
       // 18 bit mantissa
       uint8_t brExp = 0;
@@ -372,8 +385,11 @@ namespace erizo {
       }
       const uint32_t brMantissa = (bitrate >> brExp);
       rtcpPacket[pos++]=(uint8_t)((brExp << 2) + ((brMantissa >> 16) & 0x03));
+      ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos]);
       rtcpPacket[pos++]=(uint8_t)(brMantissa >> 8);
+      ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos]);
       rtcpPacket[pos++]=(uint8_t)(brMantissa);
+      ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos]);
 
    uint32_t* ptr2 = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
    ptr2[0] = htonl(this->getVideoSourceSSRC());
