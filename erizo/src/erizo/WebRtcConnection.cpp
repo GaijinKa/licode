@@ -383,7 +383,7 @@ namespace erizo {
     videoTransport_->write((char*)rtcpPacket, pos);
    }
 
-   sscanf(line, "Value of integer: %" SCNu8 "\n", &rtcpPacket);
+   ELOG_INFO("REMB PACKET IS %"SCNu8,rtcpPacket);
    return pos;
   }
 
