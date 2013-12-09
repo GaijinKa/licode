@@ -3,7 +3,7 @@
  */
 
 #include <cstdio>
-
+#include <inttypes.h>
 #include "WebRtcConnection.h"
 #include "DtlsTransport.h"
 #include "SdesTransport.h"
@@ -383,8 +383,7 @@ namespace erizo {
     videoTransport_->write((char*)rtcpPacket, pos);
    }
 
-   ELOG_INFO("REMB PACKET IS %u",rtcpPacket);
-
+   sscanf(line, "Value of integer: %" SCNu8 "\n", &rtcpPacket);
    return pos;
   }
 
