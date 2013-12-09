@@ -383,6 +383,7 @@ namespace erizo {
     videoTransport_->write((char*)rtcpPacket, pos);
    }
 
+   ELOG_INFO("REMB PACKET IS %s",rtcpPacket.c_str());
    return pos;
   }
 
