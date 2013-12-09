@@ -334,7 +334,7 @@ namespace erizo {
    ELOG_INFO("Generating REMB Packet (bitrate=%lu)",bitrate);
    int pos = 0;
    uint8_t rtcpPacket[50];
-   // add REMB (pt=205, fmt=15)
+   // add REMB (pt=206, fmt=15)
    uint8_t FMT = 15;
    rtcpPacket[pos++] = (uint8_t) 0x80 + FMT;
    rtcpPacket[pos++] = (uint8_t) 206;
@@ -383,7 +383,7 @@ namespace erizo {
     videoTransport_->write((char*)rtcpPacket, pos);
    }
 
-   ELOG_INFO("REMB PACKET IS %s",rtcpPacket.c_str());
+   ELOG_INFO("REMB PACKET IS %s",rtcpPacket.str());
    return pos;
   }
 
