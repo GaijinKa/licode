@@ -11,6 +11,16 @@
 #include "SdpInfo.h"
 #include "rtputils.h"
 
+#define BYTETOBINARYPATTERN "%d%d%d%d%d%d%d%d"
+#define BYTETOBINARY(byte)  \
+  (byte & 0x80 ? 1 : 0), \
+  (byte & 0x40 ? 1 : 0), \
+  (byte & 0x20 ? 1 : 0), \
+  (byte & 0x10 ? 1 : 0), \
+  (byte & 0x08 ? 1 : 0), \
+  (byte & 0x04 ? 1 : 0), \
+  (byte & 0x02 ? 1 : 0), \
+  (byte & 0x01 ? 1 : 0)
 namespace erizo {
   DEFINE_LOGGER(WebRtcConnection, "WebRtcConnection");
 
@@ -333,57 +343,57 @@ namespace erizo {
   int WebRtcConnection::sendRembPacket(uint32_t bitrate) {
    ELOG_INFO("Generating REMB Packet (bitrate=%lu)",bitrate);
    int pos = 0;
-   uint8_t rtcpPacket[50];
+   uint8_t rtcpPacket[48];
    // add REMB (pt=206, fmt=15)
    uint8_t FMT = 15;
    ELOG_INFO("REMB PACKET : VER+FMT");
    rtcpPacket[pos++] = (uint8_t) 0x80 + FMT;
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
    ELOG_INFO("REMB PACKET : PAYLOAD");
    rtcpPacket[pos++] = (uint8_t) 206;
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
 
    //Length of 5
    ELOG_INFO("REMB PACKET : LENGTH");
    rtcpPacket[pos++] = (uint8_t) 0;
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
    rtcpPacket[pos++] = (uint8_t) (5);
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
 
    // Add our own SSRC
    ELOG_INFO("REMB PACKET : SENDERSSRC");
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-4]));
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-3]));
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-2]));
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-4]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-3]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-2]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
 
    uint32_t* ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
    ptr[0] = htonl(this->getVideoSinkSSRC());
    pos += 4;
    ELOG_INFO("REMB PACKET : VIDEOSINKSSRC");
    rtcpPacket[pos++] = (uint8_t) 0;
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
    rtcpPacket[pos++] = (uint8_t) 0;
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
    rtcpPacket[pos++] = (uint8_t) 0;
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
    rtcpPacket[pos++] = (uint8_t) 0;
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
 
    ELOG_INFO("REMB PACKET : 'R''E''M''B'");
    rtcpPacket[pos++] = 'R';
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
    rtcpPacket[pos++] = 'E';
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
    rtcpPacket[pos++] = 'M';
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
    rtcpPacket[pos++] = 'B';
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
 
 
    ELOG_INFO("REMB PACKET : MANTISSA");
       rtcpPacket[pos++] = (uint8_t) 1;
-      printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+      printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
       // 6 bit Exp
       // 18 bit mantissa
       uint8_t brExp = 0;
@@ -397,21 +407,21 @@ namespace erizo {
       }
       const uint32_t brMantissa = (bitrate >> brExp);
       rtcpPacket[pos++]=(uint8_t)((brExp << 2) + ((brMantissa >> 16) & 0x03));
-      printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+      printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
       rtcpPacket[pos++]=(uint8_t)(brMantissa >> 8);
-      printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+      printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
       rtcpPacket[pos++]=(uint8_t)(brMantissa);
-      printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+      printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
 
    uint32_t* ptr2 = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
    ptr2[0] = htonl(this->getVideoSourceSSRC());
    pos += 4;
 
    ELOG_INFO("REMB PACKET : VIDEOSSRC");
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-4]));
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-3]));
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-2]));
-   printf ("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-4]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-3]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-2]));
+   printf("Leading text "BYTETOBINARYPATTERN, BYTETOBINARY(rtcpPacket[pos-1]));
 
    if (videoTransport_ != NULL) {
     videoTransport_->write((char*)rtcpPacket, pos);
