@@ -375,7 +375,7 @@ namespace erizo {
       rtcpPacket[pos++]=(uint8_t)(brMantissa);
 
    uint32_t* ptr2 = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
-   ptr2[0] = htonl(this->getVideoSinkSSRC());
+   ptr2[0] = htonl(this->getVideoSourceSSRC());
    pos += 4;
 
    if (videoTransport_ != NULL) {
@@ -505,6 +505,7 @@ namespace erizo {
         if (thefir->fmt == 4){ // It is a FIR Packet, we generate it
           //ELOG_DEBUG("Feedback FIR packet, changed source %u sourcessrc to %u fmt %d", ssrc, sourcessrc, thefir->fmt);
           this->sendFirPacket();
+          this->sendRembPacket();
         }
       }
     } while(totalLength<len);
