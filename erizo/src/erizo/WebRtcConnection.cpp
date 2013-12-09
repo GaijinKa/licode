@@ -45,6 +45,7 @@ namespace erizo {
     stunPort_ = stunPort;
     minPort_ = minPort;
     maxPort_ = maxPort;
+    maxVideoBitRate_ = 300000;
   }
 
   WebRtcConnection::~WebRtcConnection() {
@@ -505,7 +506,7 @@ namespace erizo {
         if (thefir->fmt == 4){ // It is a FIR Packet, we generate it
           //ELOG_DEBUG("Feedback FIR packet, changed source %u sourcessrc to %u fmt %d", ssrc, sourcessrc, thefir->fmt);
           this->sendFirPacket();
-          this->sendRembPacket();
+          this->sendRembPacket(maxVideoBitRate_);
         }
       }
     } while(totalLength<len);

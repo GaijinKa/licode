@@ -100,6 +100,7 @@ private:
 	WebRTCState globalState_;
 
 	int video_, audio_, bundle_, sequenceNumberFIR_;
+	uint32_t maxVideoBitRate_;
 	boost::mutex writeMutex_, receiveAudioMutex_, receiveVideoMutex_, updateStateMutex_;
 	boost::thread send_Thread_;
 	std::queue<dataPacket> sendQueue_;
