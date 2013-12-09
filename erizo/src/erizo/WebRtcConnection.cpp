@@ -331,7 +331,7 @@ namespace erizo {
 
 
   int WebRtcConnection::sendRembPacket(uint32_t bitrate) {
-   ELOG_DEBUG("Generating REMB Packet (bitrate=%lu)",bitrate);
+   ELOG_INFO("Generating REMB Packet (bitrate=%lu)",bitrate);
    int pos = 0;
    uint8_t rtcpPacket[50];
    // add REMB (pt=205, fmt=15)
@@ -441,7 +441,7 @@ namespace erizo {
 
     if (temp == READY && globalState_ != temp) {
       ELOG_INFO("Ready to send and receive media");
-      this->sendRembPacket(maxVideoBitRate_);
+ //     this->sendRembPacket(maxVideoBitRate_);
     }
 
     if (audioTransport_ != NULL && videoTransport_ != NULL) {
