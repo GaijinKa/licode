@@ -351,6 +351,12 @@ namespace erizo {
    ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos-1]);
 
    // Add our own SSRC
+   ELOG_INFO("REMB PACKET : SENDERSSRC");
+   ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos-4]);
+   ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos-3]);
+   ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos-2]);
+   ELOG_INFO("REMB PACKET : %u",rtcpPacket[pos-1]);
+
    uint32_t* ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
    ptr[0] = htonl(this->getVideoSinkSSRC());
    pos += 4;
