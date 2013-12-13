@@ -81,6 +81,7 @@ namespace erizo {
       fbsource->setFeedbackSink(this);
     }
     this->subscribers[peerId] = webRtcConn;
+
   }
 
   void OneToManyProcessor::removeSubscriber(const std::string& peerId) {

@@ -77,8 +77,7 @@ exports.WebRtcController = function () {
                 if (state >= 2) {
                     clearInterval(intervarId);
                 }
-
-
+                
             }, INTERVAL_TIME_SDP);
     };
 
@@ -225,6 +224,13 @@ exports.WebRtcController = function () {
         }
     };
 
+    
+    //testing askFir
+    that.askFir = function (who) {
+    	publishers[from].sendFir();
+    };
+    
+    
     /*
      * Removes a publisher from the room. This also deletes the associated OneToManyProcessor.
      */

@@ -40,7 +40,7 @@ exports.Stream = function (spec) {
     that.getDataSubscribers = function () {
         return dataSubscribers;
     };
-
+	
     that.addDataSubscriber = function (id) {
         if (dataSubscribers.indexOf(id) === -1) {
             dataSubscribers.push(id);

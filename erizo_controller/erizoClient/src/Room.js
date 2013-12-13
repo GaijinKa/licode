@@ -209,8 +209,8 @@ Erizo.Room = function (spec) {
         });
     };
 
-    // Public functions
-
+    // Public functions	
+	
     // It stablishes a connection to the room. Once it is done it throws a RoomEvent("room-connected")
     that.connect = function () {
         var streamList = [],
@@ -421,6 +421,11 @@ Erizo.Room = function (spec) {
             stream.sendData = function (msg) {};
         }
     };
+
+	// Ask 4 Fir  //TESTING
+	that.ask4FIR = function (stream) {
+		sendSDPSocket('askFir', {streamId: stream.getID()});		
+	}	
 
     // It subscribe to a remote stream and draws it inside the HTML tag given by the ID='elementID'
     that.subscribe = function (stream, options, callbackError) {

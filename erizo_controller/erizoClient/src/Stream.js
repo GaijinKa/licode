@@ -141,7 +141,7 @@ Erizo.Stream = function (spec) {
 
     that.show = that.play;
     that.hide = that.stop;
-
+	
     getFrame = function () {
         if (that.player !== undefined && that.stream !== undefined) {
             var video = that.player.video,

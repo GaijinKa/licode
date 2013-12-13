@@ -328,6 +328,13 @@ var listen = function () {
             }
         });
 
+		//TESTING
+        socket.on('askFir', function (options) {
+			socket.room.webRtcController.askFir(options.streamId);
+		});
+		
+		
+		
         //Gets 'subscribe' messages on the socket in order to add new subscriber to a determined stream (options.streamId).
         socket.on('subscribe', function (options, sdp, callback) {
             if (!socket.user.permissions[Permission.SUBSCRIBE]) {
