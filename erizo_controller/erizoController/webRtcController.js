@@ -227,7 +227,8 @@ exports.WebRtcController = function () {
     
     //testing askFir
     that.askFir = function (who) {
-    	publishers[from].sendFir();
+		logger.info("sending new FIR");
+		publishers[who].sendFIR();
     };
     
     
