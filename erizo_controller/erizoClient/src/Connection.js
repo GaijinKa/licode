@@ -16,12 +16,12 @@ Erizo.Connection = function (spec) {
 	    console.log("FcStack");
         L.Logger.error('Publish/subscribe video/audio streams not supported in erizofc yet');
         that = Erizo.FcStack(spec);
-    } else if (BrowserDetect.browser == "Chrome" && (parseInt(BrowserDetect.version)>=25 && parseInt(BrowserDetect.version)<=32)) {
+    } else if (BrowserDetect.browser == "Chrome" && (parseInt(BrowserDetect.version)>=25 && parseInt(BrowserDetect.version)<=33)) {
         // Google Chrome Stable.
         console.log("Stable! "+parseInt(BrowserDetect.version));
         that = Erizo.ChromeStableStack(spec);
         that.browser = "chrome-stable";
-    } else if (BrowserDetect.browser == "Chrome" && (parseInt(BrowserDetect.version)>32)) {
+    } else if (BrowserDetect.browser == "Chrome" && (parseInt(BrowserDetect.version)>33)) {
         // Google Chrome Canary.
         console.log("Canary! "+parseInt(BrowserDetect.version));
         that = Erizo.ChromeCanaryStack(spec);
@@ -29,7 +29,7 @@ Erizo.Connection = function (spec) {
     } else if (BrowserDetect.browser == "Bowser" && (parseInt(BrowserDetect.version) == "25"|| parseInt(BrowserDetect.version)== "28")) {
         // Bowser
         that.browser = "bowser";
-    } else if (BrowserDetect.browser == "Firefox" && (parseInt(BrowserDetect.version) >= 20 || parseInt(BrowserDetect.version) < 23)) {
+    } else if (BrowserDetect.browser == "Firefox" && (parseInt(BrowserDetect.version) >= 20)) {// || parseInt(BrowserDetect.version) < 23)) {
         // Firefox
 		console.log("Firefox!");
 		that = Erizo.FirefoxStack(spec);

@@ -155,8 +155,21 @@ namespace erizo {
     nice_agent_add_stream(agent_, iceComponents_);
     // Set Port Range ----> If this doesn't work when linking the file libnice.sym has to be modified to include this call
     if (minPort_!=0 && maxPort_!=0){
-      nice_agent_set_port_range(agent_, (guint)1, (guint)1, (guint)minPort_, (guint)maxPort_);
+	ELOG_DEBUG("Setting port range: %d to %d\n", minPort_, maxPort_);
+        nice_agent_set_port_range(agent_, (guint)1, (guint)1, (guint)minPort_, (guint)maxPort_);
     }
+
+    if (false){
+       ELOG_DEBUG("Setting TURN\n");
+       nice_agent_set_relay_info              (agent_,
+                                                          1,
+                                                          1,
+                                                          "",
+                                                          0,
+                                                          "il",
+                                                          "i",
+                                                          NICE_RELAY_TYPE_TURN_UDP);
+     }
 
     nice_agent_gather_candidates(agent_, 1);
     nice_agent_attach_recv(agent_, 1, 1, context_,
@@ -191,7 +204,7 @@ namespace erizo {
           case HOST:
             nice_cand_type = NICE_CANDIDATE_TYPE_HOST;
             break;
-          case SRLFX:
+          case SRFLX:
             nice_cand_type = NICE_CANDIDATE_TYPE_SERVER_REFLEXIVE;
             break;
           case PRFLX:
@@ -206,10 +219,10 @@ namespace erizo {
         }
 
         NiceCandidate* thecandidate = nice_candidate_new(nice_cand_type);
-        NiceAddress* naddr = nice_address_new();
-        nice_address_set_from_string(naddr, cinfo.hostAddress.c_str());
-        nice_address_set_port(naddr, cinfo.hostPort);
-        thecandidate->addr = *naddr;
+//        NiceAddress* naddr = nice_address_new();
+//        nice_address_set_from_string(naddr, cinfo.hostAddress.c_str());
+//        nice_address_set_port(naddr, cinfo.hostPort);
+//        thecandidate->addr = *naddr;
         sprintf(thecandidate->foundation, "%s", cinfo.foundation.c_str());
 
         thecandidate->username = strdup(cinfo.username.c_str());
@@ -218,12 +231,27 @@ namespace erizo {
         thecandidate->component_id = cinfo.componentId;
         thecandidate->priority = cinfo.priority;
         thecandidate->transport = NICE_CANDIDATE_TRANSPORT_UDP;
-	    nice_agent_set_remote_credentials(agent_, (guint) 1, thecandidate->username, thecandidate->password);
-        candList = g_slist_append(candList, thecandidate);
+//	    nice_agent_set_remote_credentials(agent_, (guint) 1, thecandidate->username, thecandidate->password);
+//ADDING
+	nice_address_set_from_string(&thecandidate->addr, cinfo.hostAddress.c_str());
+        nice_address_set_port(&thecandidate->addr, cinfo.hostPort);
+
+        if (cinfo.hostType == RELAY||cinfo.hostType==SRFLX){
+          nice_address_set_from_string(&thecandidate->base_addr, cinfo.rAddress.c_str());
+          nice_address_set_port(&thecandidate->base_addr, cinfo.rPort);
+          ELOG_DEBUG("Adding remote candidate type %d addr %s port %d raddr %s rport %d", cinfo.hostType, cinfo.hostAddress.c_str(), cinfo.hostPort,
+              cinfo.rAddress.c_str(), cinfo.rPort);
+        }else{
+          ELOG_DEBUG("Adding remote candidate type %d addr %s port %d", cinfo.hostType, cinfo.hostAddress.c_str(), cinfo.hostPort);
+        }
+//END ADD
+
+        candList = g_slist_prepend(candList, thecandidate);
         ELOG_DEBUG("New Candidate SET %s %d", cinfo.hostAddress.c_str(), cinfo.hostPort);
 
       }
-      nice_agent_set_remote_candidates(agent_, (guint) 1, compId, candList);
+      	nice_agent_set_remote_candidates(agent_, (guint) 1, compId, candList);
+	g_slist_free_full(candList, (GDestroyNotify)&nice_candidate_free);   //LINE ADDED
     }
 
     ELOG_DEBUG("Candidates SET");
@@ -297,9 +325,10 @@ namespace erizo {
             cand_info.hostType = HOST;
             break;
           case NICE_CANDIDATE_TYPE_SERVER_REFLEXIVE:
-            cand_info.hostType = SRLFX;
-            cand_info.baseAddress = std::string(baseAddress);
-            cand_info.basePort = nice_address_get_port(&cand->base_addr);
+            cand_info.hostType = SRFLX;
+	    cand_info.rAddress = std::string(baseAddress);  			//            cand_info.baseAddress = std::string(baseAddress);
+	    cand_info.rPort = nice_address_get_port(&cand->base_addr);    	//            cand_info.basePort = nice_address_get_port(&cand->base_addr);
+
             break;
           case NICE_CANDIDATE_TYPE_PEER_REFLEXIVE:
             cand_info.hostType = PRFLX;
@@ -307,6 +336,8 @@ namespace erizo {
           case NICE_CANDIDATE_TYPE_RELAYED:
             ELOG_DEBUG("WARNING TURN NOT IMPLEMENTED YET");
             cand_info.hostType = RELAY;
+            cand_info.rAddress = std::string(baseAddress);
+            cand_info.rPort = nice_address_get_port(&cand->base_addr);
             break;
           default:
             break;
@@ -367,6 +398,15 @@ namespace erizo {
   void NiceConnection::updateIceState(IceState state) {
     ELOG_DEBUG("%s - NICE State Changed %u", transportName->c_str(), state);
     this->iceState = state;
+    if (state == NICE_READY){
+ 	char ipaddr[30];
+       	NiceCandidate* local, *remote;
+      	nice_agent_get_selected_pair(agent_, 1, 1, &local, &remote); 
+       	nice_address_to_string(&local->addr, ipaddr);
+       	ELOG_DEBUG("Selected pair:\nlocal candidate addr: %s:%d",ipaddr, nice_address_get_port(&local->addr));
+       	nice_address_to_string(&remote->addr, ipaddr);
+       	ELOG_DEBUG("remote candidate addr: %s:%d",ipaddr, nice_address_get_port(&remote->addr));
+    }
     if (this->listener_ != NULL)
       this->listener_->updateIceState(state, this);
   }

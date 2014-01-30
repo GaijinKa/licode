@@ -306,7 +306,7 @@ namespace erizo {
     // add full intra request indicator
     uint8_t FMT = 4;
     rtcpPacket[pos++] = (uint8_t) 0x80 + FMT;
-    rtcpPacket[pos++] = (uint8_t) 206;
+    rtcpPacket[pos++] = (uint8_t) 192;//206;
 
     //Length of 4
     rtcpPacket[pos++] = (uint8_t) 0;

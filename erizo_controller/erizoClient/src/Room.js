@@ -64,6 +64,7 @@ Erizo.Room = function (spec) {
         } catch (error) {
             L.Logger.debug("Socket already disconnected");
         }
+		L.Logger.debug("Closing Socket");
         that.socket = undefined;
     });
 
@@ -95,12 +96,16 @@ Erizo.Room = function (spec) {
     // It connects to the server through socket.io
     connectSocket = function (token, callback, error) {
         // Once we have connected
-
+		var undefined;
         var host = 'http://' + token.host;
-
+		
+		L.Logger.info("HAS PRIVATE IP? "+hasPrivateIP);
+		
+		if (hasPrivateIP !== undefined && hasPrivateIP!==null)
+			var host = 'http://'+hasPrivateIP;
         delete io.sockets[host];
 
-        that.socket = io.connect(token.host, {reconnect: false, secure: false});
+        that.socket = io.connect(host, {reconnect: false, secure: false});
 
         // We receive an event with a new stream in the room.
         // type can be "media" or "data"
@@ -116,21 +121,31 @@ Erizo.Room = function (spec) {
         that.socket.on('onSubscribeP2P', function (arg) {
             var myStream = that.localStreams[arg.streamId];
 
-            myStream.pc = Erizo.Connection({callback: function (offer) {
-                sendSDPSocket('publish', {state: 'p2pSignaling', streamId: arg.streamId, subsSocket: arg.subsSocket}, offer, function (answer, id) {
-                    if (answer === 'error') {
-                        if (callbackError) callbackError(answer);
-                    }
-                    myStream.pc.onsignalingmessage = function (ok) {
-                        myStream.pc.onsignalingmessage = function () {};
-                    };
-
-                    myStream.pc.processSignalingMessage(answer);
-                });
-            }, audio: myStream.hasAudio(), video: myStream.hasVideo(), stunServerUrl: that.stunServerUrl, turnServer: that.turnServer});
-
-            myStream.pc.addStream(myStream.stream);
-
+            if (myStream.pc === undefined) {
+                 myStream.pc = {};
+             }
+ 
+             myStream.pc[arg.subsSocket] = Erizo.Connection({callback: function (offer) {
+                  sendSDPSocket('publish', {state: 'p2pSignaling', streamId: arg.streamId, subsSocket: arg.subsSocket}, offer, function (answer, id) {
+                      if (answer === 'error') {
+                          if (callbackError) callbackError(answer);
+                      }
+                     myStream.pc[arg.subsSocket].onsignalingmessage = function (ok) {
+                         myStream.pc[arg.subsSocket].onsignalingmessage = function () {};
+                      };
+  
+                     myStream.pc[arg.subsSocket].processSignalingMessage(answer);
+                  });
+              }, audio: myStream.hasAudio(), video: myStream.hasVideo(), stunServerUrl: that.stunServerUrl, turnServer: that.turnServer});
+  
+             myStream.pc[arg.subsSocket].addStream(myStream.stream);
+ 
+             myStream.pc[arg.subsSocket].oniceconnectionstatechange = function (state) {
+                 if (state === 'disconnected') {
+                     myStream.pc[arg.subsSocket].close();
+                     delete myStream.pc[arg.subsSocket];
+                 }
+             };
         });
 
         that.socket.on('onPublishP2P', function (arg, callback) {
@@ -187,7 +202,9 @@ Erizo.Room = function (spec) {
 
     // Function to send a message to the server using socket.io
     sendMessageSocket = function (type, msg, callback, error) {
+		L.Logger.debug("Send Message - Emit status is " + that.socket.connected + " for type " + type);
         that.socket.emit(type, msg, function (respType, msg) {
+			L.Logger.debug("Send Message Callback - Emit status is " + that.socket.connected);
             if (respType === "success") {
                 if (callback !== undefined) {
                     callback(msg);
@@ -202,7 +219,9 @@ Erizo.Room = function (spec) {
 
     // It sends a SDP message to the server using socket.io
     sendSDPSocket = function (type, options, sdp, callback) {
+		L.Logger.debug("Send SDP - Emit status is " + that.socket.connected + " for type " + type);
         that.socket.emit(type, options, sdp, function (response, respCallback) {
+			L.Logger.debug("Send SDP Callback - Emit status is " + that.socket.connected);
             if (callback !== undefined) {
                 callback(response, respCallback);
             }
