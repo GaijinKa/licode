@@ -99,8 +99,6 @@ Erizo.Room = function (spec) {
 		var undefined;
         var host = 'http://' + token.host;
 		
-		L.Logger.info("HAS PRIVATE IP? "+hasPrivateIP);
-		
 		if (hasPrivateIP !== undefined && hasPrivateIP!==null)
 			var host = 'http://'+hasPrivateIP;
         delete io.sockets[host];
@@ -400,9 +398,9 @@ Erizo.Room = function (spec) {
 
     
     // Start Recording
-    that.record = function (stream, name, room, callback, errorCallback) {
+    that.record = function (stream, name, room, resW, resH, callback, errorCallback) {
     	L.Logger.debug("Start Recording " + name + "in room "+ room);
-        sendMessageSocket('startRecorder', {to: stream.getID(), name: name, room: room}, callback, errorCallback);
+        sendMessageSocket('startRecorder', {to: stream.getID(), name: name, room: room, resW: resW, resH: resH}, callback, errorCallback);
     };
     
     // Stop Recording

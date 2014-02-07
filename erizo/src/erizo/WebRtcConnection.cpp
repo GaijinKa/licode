@@ -306,7 +306,7 @@ namespace erizo {
     // add full intra request indicator
     uint8_t FMT = 4;
     rtcpPacket[pos++] = (uint8_t) 0x80 + FMT;
-    rtcpPacket[pos++] = (uint8_t) 192;//206;
+    rtcpPacket[pos++] = (uint8_t) 206; //192
 
     //Length of 4
     rtcpPacket[pos++] = (uint8_t) 0;
@@ -553,7 +553,7 @@ namespace erizo {
         if (thefir->fmt == 4){ // It is a FIR Packet, we generate it
           //ELOG_DEBUG("Feedback FIR packet, changed source %u sourcessrc to %u fmt %d", ssrc, sourcessrc, thefir->fmt);
           this->sendFirPacket();
-          this->sendRembPacket(maxVideoBitRate_);
+//          this->sendRembPacket(maxVideoBitRate_);
         }
       }
     } while(totalLength<len);

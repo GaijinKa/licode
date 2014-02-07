@@ -64,22 +64,22 @@ Erizo.ChromeCanaryStack = function (spec) {
 
     //L.Logger.debug("Created webkitRTCPeerConnnection with config \"" + JSON.stringify(that.pc_config) + "\".");
 
-    var setMaxBW = function (sdp) {
-		console.log("MAXVIDEOBW IS", spec.maxVideoBW);
-        if (spec.maxVideoBW) {
-            var a = sdp.match(/m=video.*\r\n/);
-            var r = a[0] + "b=AS:" + spec.maxVideoBW + "\r\n";
-            sdp = sdp.replace(a[0], r);
-        }
+//    var setMaxBW = function (sdp) {
+//		console.log("MAXVIDEOBW IS", spec.maxVideoBW);
+//        if (spec.maxVideoBW) {
+//            var a = sdp.match(/m=video.*\r\n/);
+//            var r = a[0] + "b=AS:" + spec.maxVideoBW + "\r\n";
+//            sdp = sdp.replace(a[0], r);
+//        }
 
-        if (spec.maxAudioBW) {
-            var a = sdp.match(/m=audio.*\r\n/);
-            var r = a[0] + "b=AS:" + spec.maxAudioBW + "\r\n";
-            sdp = sdp.replace(a[0], r);
-        }
-
-        return sdp;
-    };
+//        if (spec.maxAudioBW) {
+//            var a = sdp.match(/m=audio.*\r\n/);
+//            var r = a[0] + "b=AS:" + spec.maxAudioBW + "\r\n";
+//            sdp = sdp.replace(a[0], r);
+//        }
+//
+//        return sdp;
+//    };
 
     /**
      * This function processes signalling messages from the other side.
@@ -124,7 +124,7 @@ Erizo.ChromeCanaryStack = function (spec) {
                     type: 'answer'
                 };
 				
-                sd.sdp = setMaxBW(sd.sdp);
+                sd.sdp = setBandwidth(sd.sdp);
                 L.Logger.debug("Received ANSWER: ", sd.sdp);
 
                 that.peerConnection.setRemoteDescription(new RTCSessionDescription(sd));
@@ -236,7 +236,7 @@ Erizo.ChromeCanaryStack = function (spec) {
                     //sessionDescription.sdp = newOffer.replace(/a=crypto:0 AES_CM_128_HMAC_SHA1_80 inline:.*\r\n/g, "a=crypto:0 AES_CM_128_HMAC_SHA1_80 inline:eUMxlV2Ib6U8qeZot/wEKHw9iMzfKUYpOPJrNnu3\r\n");
                     //sessionDescription.sdp = newOffer.replace(/a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:.*\r\n/g, "a=crypto:1 AES_CM_128_HMAC_SHA1_80 inline:eUMxlV2Ib6U8qeZot/wEKHw9iMzfKUYpOPJrNnu3\r\n");
 
-                    sessionDescription.sdp = setMaxBW(sessionDescription.sdp);
+                    sessionDescription.sdp = setBandwidth(sessionDescription.sdp);
                     L.Logger.debug("Changed", sessionDescription.sdp);
 
                     var newOffer = sessionDescription.sdp;

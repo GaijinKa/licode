@@ -25,7 +25,7 @@ namespace erizo{
     public:
       ExternalOutput ();
       virtual ~ExternalOutput();
-      bool init(const std::string path, const std::string name, const std::string room);
+      bool init(const std::string path, const std::string name, const std::string room, const std::string width, const std::string height);
       int deliverAudioData(char* buf, int len);
 	  int deliverVideoData(char* buf, int len);
       void receiveRawData(RawDataPacket& packet);
@@ -52,6 +52,7 @@ namespace erizo{
       int prevEstimatedFps_;
       int warmupfpsCount_;
       int sequenceNumberFIR_;
+      int videoW, videoH;
 //      unsigned long long lastTime_;
       bool KFrame;
       double lastKeyFrame, lastTs;

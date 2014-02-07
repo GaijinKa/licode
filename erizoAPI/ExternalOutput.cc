@@ -53,13 +53,17 @@ Handle<Value> ExternalOutput::init(const Arguments& args) {
   v8::String::Utf8Value param(args[0]->ToString());
   v8::String::Utf8Value param2(args[1]->ToString());
   v8::String::Utf8Value param3(args[2]->ToString());
+  v8::String::Utf8Value param4(args[3]->ToString());
+  v8::String::Utf8Value param5(args[4]->ToString());
 
 // convert it to string
   std::string path = std::string(*param);
   std::string name = std::string(*param2);
   std::string room = std::string(*param3);
+  std::string width = std::string(*param4);
+  std::string height = std::string(*param5);
 
-  int r = me->init(path, name, room);
+  int r = me->init(path, name, room, width, height);
 
   return scope.Close(Integer::New(r));
 }

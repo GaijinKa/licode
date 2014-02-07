@@ -40,9 +40,11 @@ namespace erizo {
     fbSink_ = NULL;
   }
 
-  bool ExternalOutput::init(std::string path, std::string name, std::string room){
+  bool ExternalOutput::init(std::string path, std::string name, std::string room, std::string width, std::string height){
 
-	std::cout << "Init Recorder" << std::endl;
+	std::cout << "Init Recorder " <<  width << " x " << height << std::endl;
+    videoW = atoi(width.c_str());
+    videoH = atoi(height.c_str());
 
     av_register_all();
     avcodec_register_all();
@@ -304,8 +306,8 @@ namespace erizo {
       video_st->id = 0;
       videoCodecCtx_ = video_st->codec;
       videoCodecCtx_->codec_id = oformat_->video_codec;
-      videoCodecCtx_->width = 320;
-      videoCodecCtx_->height = 240;
+      videoCodecCtx_->width = videoW;
+      videoCodecCtx_->height = videoH;
       videoCodecCtx_->time_base = (AVRational){1,(int)prevEstimatedFps_};
       videoCodecCtx_->pix_fmt = PIX_FMT_YUV420P;
       if (oformat_->flags & AVFMT_GLOBALHEADER){
