@@ -386,6 +386,7 @@ var listen = function () {
 
 	  logger.debug("RESOLUTION TEST : "+resW+"x"+resH);
 
+
           if (resH==undefined || resH==null)
 		resH=240;
 

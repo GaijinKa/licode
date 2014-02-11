@@ -42,6 +42,7 @@ namespace erizo {
 
   bool ExternalOutput::init(std::string path, std::string name, std::string room, std::string width, std::string height){
 
+
     std::cout << "Init Recorder " <<  width << " x " << height << std::endl;
 
     videoW = atoi(width.c_str());

@@ -1,3 +1,4 @@
+
 /*global require, exports, console, setInterval, clearInterval*/
 
 var addon = require('./../../erizoAPI/build/Release/addon');

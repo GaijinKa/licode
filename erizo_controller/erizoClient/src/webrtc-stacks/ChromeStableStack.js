@@ -1,3 +1,4 @@
+
 /*global window, console, RTCSessionDescription, RoapConnection, webkitRTCPeerConnection*/
 
 var Erizo = Erizo || {};

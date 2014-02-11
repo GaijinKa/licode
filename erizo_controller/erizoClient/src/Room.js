@@ -1,3 +1,4 @@
+
 /*global L, io, console*/
 /*
  * Class Room represents a Licode Room. It will handle the connection, local stream publication and
