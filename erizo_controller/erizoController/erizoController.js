@@ -379,9 +379,21 @@ var listen = function () {
           }
           var streamId = options.to;
           var username = options.name;
-          var room = options.room;
+          var room = options.room;	
+
 	  var resH = options.resH;
 	  var resW = options.resW;
+
+	  logger.debug("RESOLUTION TEST : "+resW+"x"+resH);
+
+          if (resH==undefined || resH==null)
+		resH=240;
+
+          if (resW==undefined || resW==null)
+                resW=320;
+
+
+          logger.debug("RESOLUTION TEST /2: "+resW+"x"+resH);
 
           logger.info("erizoController.js: Starting recorder streamID " + streamId + ", for user " + username + " in room " + room);
             if (socket.room.streams[streamId].hasAudio() || socket.room.streams[streamId].hasVideo() || socket.room.streams[streamId].hasScreen()) {

@@ -12,6 +12,7 @@
  */
 var Erizo = Erizo || {};
 
+
 Erizo.Room = function (spec) {
     "use strict";
 

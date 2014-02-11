@@ -123,6 +123,7 @@ Erizo.ChromeStableStack = function (spec) {
                     sdp: msg.sdp,
                     type: 'answer'
                 };
+
                 sd.sdp = setBandwidth(sd.sdp);//setMaxBW(sd.sdp);
                 L.Logger.debug("Received ANSWER: ", sd.sdp);
 
