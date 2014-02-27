@@ -48,6 +48,7 @@ namespace erizo {
     vp8.mediaType = VIDEO_TYPE;
     internalPayloadVector_.push_back(vp8);
 
+
     RtpMap red;
     red.payloadType = RED_90000_PT;
     red.encodingName = "red";

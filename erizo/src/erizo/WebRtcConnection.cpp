@@ -55,7 +55,12 @@ namespace erizo {
     stunPort_ = stunPort;
     minPort_ = minPort;
     maxPort_ = maxPort;
-    maxVideoBitRate_ = 128000;
+//    maxVideoBitRate_ = 128000;
+
+//    avgBitrate = 0;
+//    lastAvgBitrate = 0;
+//    lastWarmupTime_ = 0;
+//    successRate = 0;
   }
 
   WebRtcConnection::~WebRtcConnection() {
@@ -196,7 +201,7 @@ namespace erizo {
             len = len - 1 - totalLength + rtpHeaderLength;
           }
         }
-    
+
         this->queueData(0, buf, len, videoTransport_);
       }
     }
@@ -208,14 +213,27 @@ namespace erizo {
     rtcpheader *chead = (rtcpheader*) buf;
     ELOG_DEBUG("received Feedback type %u ssrc %u, sourcessrc %u", chead->packettype, ntohl(chead->ssrc), ntohl(chead->ssrcsource));
     if (ntohl(chead->ssrcsource) == this->getAudioSourceSSRC()) {
-        writeSsrc(buf,len,this->getAudioSinkSSRC());      
+        writeSsrc(buf,len,this->getAudioSinkSSRC());
     } else {
-        writeSsrc(buf,len,this->getVideoSinkSSRC());      
+        writeSsrc(buf,len,this->getVideoSinkSSRC());
     }
 
     if (bundle_){
       if (videoTransport_ != NULL) {
-        this->queueData(0, buf, len, videoTransport_);
+        printRtcpHeaders(buf,len);
+    	char* movingBuf = buf;
+    	int rtcpLength = 0;
+    	int totalLength = 0;
+    	do{
+    		movingBuf+=rtcpLength;
+      		rtcpheader *chead= reinterpret_cast<rtcpheader*>(movingBuf);
+      		rtcpLength= (ntohs(chead->length)+1)*4;
+      		totalLength+= rtcpLength;
+
+		if (chead->packettype != RTCP_Receiver_PT && chead->packettype != RTCP_PS_Feedback_PT && chead->packettype != RTCP_RTP_Feedback_PT)
+	        	this->queueData(0, movingBuf, rtcpLength, videoTransport_);
+
+	} while(totalLength<len);
       }
     } else {
       // TODO: Check where to send the feedback
@@ -259,6 +277,7 @@ namespace erizo {
         if (chead->packettype == RTCP_Sender_PT) { //Sender Report
           ELOG_DEBUG ("RTP Sender Report %d length %d ", chead->packettype, ntohs(chead->length));
           recvSSRC = ntohl(chead->ssrc);
+//          this->resendRR(buf, len);
         }
 
         // Deliver data
@@ -298,6 +317,129 @@ namespace erizo {
     }
   }
 
+  int WebRtcConnection::resendRR(char *buf, int len) {
+	ELOG_DEBUG("Mirroring SR PACKET");
+    	int pos = 0;
+    	uint8_t rtcpPacket[len];
+	uint8_t RC = 1;
+
+        rtcpPacket[pos++] = (uint8_t) 0x80 + RC;
+    	rtcpPacket[pos++] = (uint8_t) 201;
+
+    	//Length of 6 (single Block)
+    	rtcpPacket[pos++] = (uint8_t) 0;
+    	rtcpPacket[pos++] = (uint8_t) (7);
+
+    	// Add our own SSRC
+    	uint32_t* ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
+    	ptr[0] = htonl(this->getVideoSinkSSRC());
+    	pos += 4;
+
+	//SKIP 2+5 LINES OF BUF
+        char *skipBuf = buf + 28;
+        SRBlock *RRpkt = reinterpret_cast<SRBlock*> (skipBuf);
+        SRheader *RRhead = reinterpret_cast<SRheader*> (buf);
+
+	ELOG_DEBUG("PRINT SR RECEIVED");
+        ELOG_DEBUG("packet RC %u", RRhead->blockcount);
+        ELOG_DEBUG("packet type %u", RRhead->packettype);
+        ELOG_DEBUG("packet length %u", RRhead->length);
+        ELOG_DEBUG("packet ssrc %u", RRhead->ssrc);
+        ELOG_DEBUG("packet ssrc_1 %u", RRpkt->ssrc);
+        ELOG_DEBUG("packet fraction %u", RRpkt->fraction);
+        ELOG_DEBUG("packet lost %u", RRpkt->lost);
+        ELOG_DEBUG("packet lsr %u", RRpkt->lsr);
+        ELOG_DEBUG("packet dlsr %u", RRpkt->dlsr);
+        ELOG_DEBUG("packet jitter %u", RRpkt->jitter);
+
+	ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
+    	ptr[0] = RRhead->ssrc;
+    	pos += 4;
+
+        rtcpPacket[pos++] = (uint8_t) 0;
+        rtcpPacket[pos++] = (uint8_t) 0;
+        rtcpPacket[pos++] = (uint8_t) 0;
+        rtcpPacket[pos++] = (uint8_t) 0;
+
+//        ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
+//        ptr[0] = (uint8_t) 0;
+//        pos += 3;
+
+        ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
+        ptr[0] = RRpkt->last_seq;
+        pos += 4;
+
+        ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
+        ptr[0] = RRpkt->jitter;
+        pos += 4;
+
+        rtcpPacket[pos++] = (uint8_t) 0;
+        rtcpPacket[pos++] = (uint8_t) 0;
+        rtcpPacket[pos++] = (uint8_t) 0;
+        rtcpPacket[pos++] = (uint8_t) 0;
+
+        rtcpPacket[pos++] = (uint8_t) 0;
+        rtcpPacket[pos++] = (uint8_t) 0;
+        rtcpPacket[pos++] = (uint8_t) 0;
+        rtcpPacket[pos++] = (uint8_t) 0;
+
+//        ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
+//        ptr[0] = RRpkt->lsr;
+//        pos += 4;
+
+//        ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
+//        ptr[0] = RRpkt->dlsr;
+//        pos += 4;
+
+        SRBlock *RRpkt2 = reinterpret_cast<SRBlock*> (rtcpPacket+8);
+        SRheader *RRhead2 = reinterpret_cast<SRheader*> (rtcpPacket);
+
+
+        ELOG_DEBUG("PRINT RR TRANSMITTED");
+        ELOG_DEBUG("packet RC %u", RRhead2->blockcount);
+        ELOG_DEBUG("packet type %u", RRhead2->packettype);
+        ELOG_DEBUG("packet length %u", RRhead2->length);
+        ELOG_DEBUG("packet ssrc %u", RRhead2->ssrc);
+        ELOG_DEBUG("packet ssrc_1 %u", RRpkt2->ssrc);
+        ELOG_DEBUG("packet fraction %u", RRpkt2->fraction);
+        ELOG_DEBUG("packet lost %u", RRpkt2->lost);
+        ELOG_DEBUG("packet lsr %u", RRpkt2->lsr);
+        ELOG_DEBUG("packet dlsr %u", RRpkt2->dlsr);
+        ELOG_DEBUG("packet jitter %u", RRpkt2->jitter);
+
+
+    	if (videoTransport_ != NULL) {
+      		videoTransport_->write((char*)rtcpPacket, pos);
+    	}
+
+    	return pos;
+  }
+
+  int WebRtcConnection::sendPliPacket() {
+    ELOG_DEBUG("Generating PLI Packet");
+    int pos = 0;
+    uint8_t rtcpPacket[50];
+    // add full intra request indicator
+    uint8_t FMT = 1;
+    rtcpPacket[pos++] = (uint8_t) 0x80 + FMT;
+    rtcpPacket[pos++] = (uint8_t) 206; //192
+
+    //Length of 4
+    rtcpPacket[pos++] = (uint8_t) 0;
+    rtcpPacket[pos++] = (uint8_t) (4);
+
+    // Add our own SSRC
+    uint32_t* ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
+    ptr[0] = htonl(this->getVideoSinkSSRC());
+    pos += 4;
+
+    if (videoTransport_ != NULL) {
+      videoTransport_->write((char*)rtcpPacket, pos);
+    }
+
+    return pos;
+  }
+
   int WebRtcConnection::sendFirPacket() {
     ELOG_DEBUG("Generating FIR Packet");
     sequenceNumberFIR_++; // do not increase if repetition
@@ -322,6 +464,8 @@ namespace erizo {
     rtcpPacket[pos++] = (uint8_t) 0;
     rtcpPacket[pos++] = (uint8_t) 0;
 
+    ELOG_DEBUG("ssrc %zu, ssrcsource %zu",this->getVideoSinkSSRC(), this->getVideoSourceSSRC());
+
     // Additional Feedback Control Information (FCI)
     uint32_t* ptr2 = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
     ptr2[0] = htonl(this->getVideoSourceSSRC());
@@ -333,69 +477,43 @@ namespace erizo {
     rtcpPacket[pos++] = (uint8_t) 0;
 
     if (videoTransport_ != NULL) {
+      ELOG_DEBUG("trasmetto fir!!");
       videoTransport_->write((char*)rtcpPacket, pos);
     }
 
     return pos;
   }
 
-
   int WebRtcConnection::sendRembPacket(uint32_t bitrate) {
-   ELOG_INFO("Generating REMB Packet (bitrate=%lu)",bitrate);
+   ELOG_INFO("Generating WEBRTCCONN REMB Packet (bitrate=%zu)",bitrate);
    int pos = 0;
    uint8_t rtcpPacket[48];
    // add REMB (pt=206, fmt=15)
    uint8_t FMT = 15;
-//   ELOG_INFO("REMB PACKET : VER+FMT");
    rtcpPacket[pos++] = (uint8_t) 0x80 + FMT;
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
-//   ELOG_INFO("REMB PACKET : PAYLOAD");
    rtcpPacket[pos++] = (uint8_t) 206;
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
 
-   //Length of 5
-//   ELOG_INFO("REMB PACKET : LENGTH");
    rtcpPacket[pos++] = (uint8_t) 0;
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
    rtcpPacket[pos++] = (uint8_t) (5);
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
 
    // Add our own SSRC
-//   ELOG_INFO("REMB PACKET : SENDERSSRC");
    uint32_t* ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
    ptr[0] = htonl(this->getVideoSinkSSRC());
    pos += 4;
 
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-4]));
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-3]));
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-2]));
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
-
-
-//   ELOG_INFO("REMB PACKET : VIDEOSINKSSRC");
    rtcpPacket[pos++] = (uint8_t) 0;
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
    rtcpPacket[pos++] = (uint8_t) 0;
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
    rtcpPacket[pos++] = (uint8_t) 0;
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
    rtcpPacket[pos++] = (uint8_t) 0;
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
 
 //   ELOG_INFO("REMB PACKET : 'R''E''M''B'");
    rtcpPacket[pos++] = 'R';
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
    rtcpPacket[pos++] = 'E';
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
    rtcpPacket[pos++] = 'M';
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
    rtcpPacket[pos++] = 'B';
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
-
 
 //   ELOG_INFO("REMB PACKET : MANTISSA");
       rtcpPacket[pos++] = (uint8_t) 1;
-//      printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
       // 6 bit Exp
       // 18 bit mantissa
       uint8_t brExp = 0;
@@ -409,21 +527,14 @@ namespace erizo {
       }
       const uint32_t brMantissa = (bitrate >> brExp);
       rtcpPacket[pos++]=(uint8_t)((brExp << 2) + ((brMantissa >> 16) & 0x03));
-//      printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
       rtcpPacket[pos++]=(uint8_t)(brMantissa >> 8);
-//      printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
       rtcpPacket[pos++]=(uint8_t)(brMantissa);
-//      printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
 
    uint32_t* ptr2 = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
    ptr2[0] = htonl(this->getVideoSourceSSRC());
    pos += 4;
 
 //   ELOG_INFO("REMB PACKET : VIDEOSSRC");
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-4]));
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-3]));
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-2]));
-//   printf(BYTETOBINARYPATTERN"\n", BYTETOBINARY(rtcpPacket[pos-1]));
 
    if (videoTransport_ != NULL) {
     videoTransport_->write((char*)rtcpPacket, pos);
@@ -487,7 +598,7 @@ namespace erizo {
 
     if (temp == READY && globalState_ != temp) {
       ELOG_INFO("Ready to send and receive media");
- //     this->sendRembPacket(maxVideoBitRate_);
+//      this->sendRembPacket(maxVideoBitRate_);
     }
 
     if (audioTransport_ != NULL && videoTransport_ != NULL) {
@@ -500,7 +611,7 @@ namespace erizo {
         (int)temp, 
         (int)globalState_);
     }
-    
+
     if (temp < 0) {
       return;
     }
@@ -538,6 +649,41 @@ namespace erizo {
     return globalState_;
   }
 
+  void WebRtcConnection::printRtcpHeaders(char* buf, int len){
+    char* movingBuf = buf;
+    int rtcpLength = 0;
+    int totalLength = 0;
+    do{
+      movingBuf+=rtcpLength;
+      rtcpheader *chead= reinterpret_cast<rtcpheader*>(movingBuf);
+      rtcpLength= (ntohs(chead->length)+1)*4;
+      totalLength+= rtcpLength;
+      firheader *thefir = reinterpret_cast<firheader*>(movingBuf);
+      ELOG_DEBUG("Feedback PT %u - [fmt %d]", thefir->packettype, thefir->fmt);
+//      if (thefir->packettype == 201) {
+//        char *skipBuf = movingBuf + 8;
+//        SRBlock *RRpkt = reinterpret_cast<SRBlock*> (skipBuf);
+//        SRheader *RRhead = reinterpret_cast<SRheader*> (movingBuf);
+
+//        ELOG_DEBUG("PRINT RR RECEIVED");
+//        ELOG_DEBUG("packet RC %u", RRhead->blockcount);
+//        ELOG_DEBUG("packet type %u", RRhead->packettype);
+//        ELOG_DEBUG("packet length %u", RRhead->length);
+//        ELOG_DEBUG("packet ssrc %u", RRhead->ssrc);
+//        ELOG_DEBUG("packet ssrc_1 %u", RRpkt->ssrc);
+//        ELOG_DEBUG("packet fraction %u", RRpkt->fraction);
+//        ELOG_DEBUG("packet lost %u", RRpkt->lost);
+//        ELOG_DEBUG("packet lsr %u", RRpkt->lsr);
+//        ELOG_DEBUG("packet dlsr %u", RRpkt->dlsr);
+//        ELOG_DEBUG("packet jitter %u", RRpkt->jitter);
+
+
+//      }
+
+
+    } while(totalLength<len);
+ }
+
   void WebRtcConnection::processRtcpHeaders(char* buf, int len, unsigned int ssrc){
     char* movingBuf = buf;
     int rtcpLength = 0;
@@ -545,16 +691,29 @@ namespace erizo {
     do{
       movingBuf+=rtcpLength;
       rtcpheader *chead= reinterpret_cast<rtcpheader*>(movingBuf);
-      rtcpLength= (ntohs(chead->length)+1)*4;      
+      rtcpLength= (ntohs(chead->length)+1)*4;
       totalLength+= rtcpLength;
       chead->ssrc=htonl(ssrc);
       if (chead->packettype == RTCP_PS_Feedback_PT){
         firheader *thefir = reinterpret_cast<firheader*>(movingBuf);
-        if (thefir->fmt == 4){ // It is a FIR Packet, we generate it
-          //ELOG_DEBUG("Feedback FIR packet, changed source %u sourcessrc to %u fmt %d", ssrc, sourcessrc, thefir->fmt);
+        if (thefir->fmt == 4) {// It is a FIR Packet, we generate it
+          ELOG_DEBUG("Feedback FIR packet, changed source %u - fmt %d", ssrc, thefir->fmt);
           this->sendFirPacket();
-//          this->sendRembPacket(maxVideoBitRate_);
-        }
+	} else if (thefir->fmt == 1) {
+          ELOG_DEBUG("Feedback PLI packet, changed source %u - fmt %d", ssrc, thefir->fmt);
+          this->sendFirPacket();
+        } else if (thefir->fmt == 15) {//It is a REMB packet, we generate it
+          ELOG_DEBUG("Feedback REMB packet, changed source %u - fmt %d", ssrc, thefir->fmt);
+          this->sendRembPacket(300000);
+
+//        } else if (thefir->fmt == 15) {
+//          rembheader *rembpkt = reinterpret_cast<rembheader*>(movingBuf);
+//          if (rembpkt->ssrcofmediasource!=0) {  //separa i Remb del recorder dagli RR di altri eventuali subscribers
+//	          ELOG_DEBUG("Feedback REMB packet, changed source %u, previous %u - fmt %d", ssrc, rembpkt->ssrc, rembpkt->fmt);
+//	          ELOG_DEBUG("bitrate %u", rembpkt->ssrcofmediasource);
+//		  this->sendRembPacket(rembpkt->ssrcofmediasource);
+//	  }
+	}
       }
     } while(totalLength<len);
   }

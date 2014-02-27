@@ -18,6 +18,7 @@ namespace erizo {
   ExternalOutput::ExternalOutput(){
     //ELOG_DEBUG("Created ExternalOutput to %s", outputUrl.c_str());
     //url = outputUrl;
+    myheader = "MEETECHO";
     sinkfbSource_=NULL;
     audioSinkSSRC_ = 0;
     videoSinkSSRC_ = 0;
@@ -27,6 +28,7 @@ namespace erizo {
     audio_st = NULL;
     KFrame = false;
     audioCoder_ = NULL;
+    dumpRTP = NULL;
     prevEstimatedFps_ = 0;
     warmupfpsCount_ = 0;
     sequenceNumberFIR_ = 0;
@@ -34,10 +36,15 @@ namespace erizo {
     writeheadres_=-1;
     unpackagedBufferpart_ = unpackagedBuffer_;
     initTime_ = 0;
+    failCount = 0;
     lastTs = 0;
     lastKeyFrame = 0;
     sinkfbSource_ = this;
     fbSink_ = NULL;
+    avgBitrate = 0;
+    lastAvgBitrate = 0;
+    lastWarmupTime_ = 0;
+    successRate = 0;
   }
 
   bool ExternalOutput::init(std::string path, std::string name, std::string room, std::string width, std::string height){
@@ -90,8 +97,9 @@ namespace erizo {
 
 	const int n2 = snprintf(NULL, 0, "%lu", timestmp_Mill);
 	char timestmp_string2[n2+1];
-	c = snprintf(timestmp_string2, n2+1, "%lu", timestmp_Mill);
+	c = snprintf(timestmp_string2, n2+1, "%d", timestmp_Mill);
 
+        dumppath = globalpath+"_"+timestmp_string1+timestmp_string2+".rtp";
  	globalpath = globalpath +"_"+timestmp_string1+timestmp_string2+".webm";
   	snprintf(context_->filename, sizeof(context_->filename), globalpath.c_str());
   	/* meetecho code */
@@ -142,6 +150,16 @@ namespace erizo {
 //      avcodec_close(audioCodecCtx_);
 //      audioCodec_ = NULL;
 //    }
+
+   if (dumpRTP!=NULL) {
+        fseek(dumpRTP, 0L, SEEK_END);
+        size_t fsize = ftell(dumpRTP);
+        fseek(dumpRTP, 0L, SEEK_SET);
+        ELOG_DEBUG("File is %zu bytes\n", fsize);
+
+        fclose(dumpRTP);
+   }
+
     ELOG_DEBUG("ExternalOutput closed Successfully");
     return;
   }
@@ -197,6 +215,7 @@ namespace erizo {
   }
 
   int ExternalOutput::deliverVideoData(char* buf, int len){
+
     if (in!=NULL){
       rtpheader *head = (rtpheader*) buf;
       if (head->payloadtype == RED_90000_PT) {
@@ -214,6 +233,7 @@ namespace erizo {
             totalLength += redhead->getLength() + 4; // RED header
             redhead = (redheader*) (buf + totalLength);
           }
+
           // Parse RED packet to VP8 packet.
           // Copy RTP header
           memcpy(deliverMediaBuffer_, buf, rtpHeaderLength);
@@ -230,9 +250,66 @@ namespace erizo {
       int ret = in->unpackageVideo(reinterpret_cast<unsigned char*>(buf), len,
           unpackagedBufferpart_, &gotUnpackagedFrame_, &estimatedFps, &videoTs_, &KFrame);
 
-      if (ret < 0)
+
+     if (ret < 0)
         return 0;
-      
+
+
+     //DUMP RTP PACKET
+     if (dumpRTP!=NULL) {
+
+ 	int myh = fwrite(myheader, sizeof(char), 8, dumpRTP);
+        ELOG_DEBUG("  >> Printing header pt.1: %zu bytes\n", myh);
+
+        uint16_t header_bytes = htons(len);
+        int hby = fwrite(&header_bytes, sizeof(uint16_t), 1, dumpRTP);
+        ELOG_DEBUG("  >> Printing header pt.2: %zu bytes\n", hby);
+
+        /* Save packet on file */
+//        int hbuf = fwrite(reinterpret_cast<unsigned char*>(buf), sizeof(char), len, dumpRTP);
+	int hbuf = 0, tot = len;
+ 	while(tot > 0) {
+         	hbuf = fwrite(reinterpret_cast<unsigned char*>(buf+len-tot), sizeof(char), tot, dumpRTP);
+         	ELOG_DEBUG("  >> Printing buffer: %zu bytes\n", hbuf);
+  		if(hbuf <= 0) {
+          		ELOG_DEBUG("  >> >> Error!\n");
+   			break;
+  		}
+  		tot -= hbuf;
+ 	}
+//       ELOG_DEBUG("  >> Printing buffer: %zu bytes\n", hbuf);
+     }
+
+
+
+//      ELOG_DEBUG("SeqNum %zu", head->seqnum);
+
+//      avgBitrate += (uint32_t) len;
+//      uint32_t elapTBit = (videoTs_ - lastWarmupTime_)/90000;
+//      if (elapTBit>=10) {
+//          ELOG_DEBUG("LastWarmup %zu millisec, videoTs %zu millisec", lastWarmupTime_, videoTs_);
+//          ELOG_DEBUG("Bitrate Warmup Time Elapsed %zu sec, received %zu bytes", elapTBit, avgBitrate);
+//          avgBitrate = (avgBitrate*8)/elapTBit;
+//          if ((avgBitrate!=0)&&((avgBitrate < lastAvgBitrate*(1-0.3))||(avgBitrate > lastAvgBitrate*(1+0.3)))&&(lastAvgBitrate!=0)){
+//                   ELOG_DEBUG("Bitrate Variation, send FIR and REMB at value %zu",avgBitrate);
+//                   this->sendFirPacket();
+//                   this->sendRembPacket(avgBitrate);
+//          } else {
+//                   successRate++;
+//                   if (successRate>3) {
+//                           uint32_t avgBitrateReUP = avgBitrate*(1+0.5);
+//                           if (avgBitrateReUP<128000) avgBitrateReUP = 128000;
+//                           ELOG_DEBUG("30 sec ok, increase BW at %zu",avgBitrateReUP);
+//                           this->sendRembPacket(avgBitrateReUP);
+//                           successRate = 0;
+//                    }
+//          }
+//          lastAvgBitrate = avgBitrate;
+//          avgBitrate = 0;
+//         lastWarmupTime_ = videoTs_;
+//     }
+
+
       if (videoCodec_ == NULL) {
         if ((estimatedFps!=0)&&((estimatedFps < prevEstimatedFps_*(1-0.2))||(estimatedFps > prevEstimatedFps_*(1+0.2)))){
           prevEstimatedFps_ = estimatedFps;
@@ -250,6 +327,7 @@ namespace erizo {
         return 0;
       }
 
+
       unpackagedSize_ += ret;
       unpackagedBufferpart_ += ret;
       if (unpackagedSize_ > UNPACKAGE_BUFFER_SIZE){
@@ -263,12 +341,15 @@ namespace erizo {
 
         if (videoTs_ < lastTs)
         {
-          ELOG_WARN("initTime is smaller than currentTime, possible problems when recording ");
+          ELOG_WARN("videoTs is smaller than lastTs, possible problems when recording");
+//	  failCount++;
+//	  this->sendFirPacket();
         }
 
-        if ((videoTs_ - lastKeyFrame)/90000 > FIR_INTERVAL_MS) {
+        if (((videoTs_ - lastKeyFrame)/90000 > FIR_INTERVAL_MS) || failCount>=10) {
         	this->sendFirPacket();
-//        	ELOG_WARN("Too much time from last FIR: %f, resend FIR PACKET",(videoTs_ - lastKeyFrame)/90);
+        	ELOG_WARN("Too messy packet or Too much time from last FIR: %f, resend FIR PACKET",(videoTs_ - lastKeyFrame)/90000);
+		failCount=0;
         }
 
         unpackagedBufferpart_ -= unpackagedSize_;
@@ -277,12 +358,13 @@ namespace erizo {
         av_init_packet(&avpkt);
         avpkt.data = unpackagedBufferpart_;
         avpkt.size = unpackagedSize_;
-        avpkt.pts = (videoTs_ - initTime_)/90;
+        avpkt.pts = AV_NOPTS_VALUE; //(videoTs_ - initTime_)/90;
+	avpkt.dts = AV_NOPTS_VALUE;
         avpkt.stream_index = 0;
         if(KFrame) {
         	avpkt.flags |= AV_PKT_FLAG_KEY;
         	lastKeyFrame = videoTs_;
-  //          ELOG_WARN("KEYFRAME, setting lastKeyframe to %f", lastKeyFrame);
+//		ELOG_WARN("KEYFRAME, setting lastKeyframe to %f", lastKeyFrame);
         }
         av_write_frame(context_, &avpkt);
         av_free_packet(&avpkt);
@@ -348,14 +430,87 @@ namespace erizo {
         ELOG_ERROR("Error writing header %d",writeheadres_);
         return false;
       }
+
+      /*creating dumpRTP */
+      dumpRTP = fopen(dumppath.c_str(), "wb");
+      if(dumpRTP == NULL) {
+              ELOG_ERROR("Error creating dump.rtp\n");
+              return false;
+      }
+
+
       ELOG_DEBUG("AVFORMAT CONFIGURED");
     }
     return true;
   }
 
+  int ExternalOutput::sendRembPacket(uint32_t bitrate) {
+
+   if (fbSink_) {
+	   ELOG_INFO("Generating EXTERNAL REMB Packet (bitrate=%zu)",bitrate);
+	   int pos = 0;
+	   uint8_t rtcpPacket[48];
+	   uint8_t FMT = 15;
+	   rtcpPacket[pos++] = (uint8_t) 0x80 + FMT;
+	   rtcpPacket[pos++] = (uint8_t) 206;
+
+	   //Length of 5
+	   rtcpPacket[pos++] = (uint8_t) 0;
+	   rtcpPacket[pos++] = (uint8_t) (5);
+
+//	   ELOG_INFO("packet sender media SSRC is %lu", 55543);
+
+	   // Add our own SSRC
+	   uint32_t* ptr = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
+	   ptr[0] = htonl(55543);
+	   pos += 4;
+
+	   //pezzotto per comunicazione bitrate!
+           uint32_t* ptr3 = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
+           ptr3[0] = bitrate;
+           pos += 4;
+
+//	   rtcpPacket[pos++] = (uint8_t) 0;
+//	   rtcpPacket[pos++] = (uint8_t) 0;
+//	   rtcpPacket[pos++] = (uint8_t) 0;
+//	   rtcpPacket[pos++] = (uint8_t) 0;
+
+	   rtcpPacket[pos++] = 'R';
+	   rtcpPacket[pos++] = 'E';
+	   rtcpPacket[pos++] = 'M';
+	   rtcpPacket[pos++] = 'B';
+
+	   rtcpPacket[pos++] = (uint8_t) 1;
+	   uint8_t brExp = 0;
+	   for(uint32_t i=0; i<64; i++) {
+	          if(bitrate <= ((uint32_t)262143 << i))  {
+        	      brExp = i;
+	              break;
+          	  }
+      	   }
+
+	   const uint32_t brMantissa = (bitrate >> brExp);
+	   rtcpPacket[pos++]=(uint8_t)((brExp << 2) + ((brMantissa >> 16) & 0x03));
+	   rtcpPacket[pos++]=(uint8_t)(brMantissa >> 8);
+	   rtcpPacket[pos++]=(uint8_t)(brMantissa);
+
+	   ELOG_DEBUG("the ssrc is %u", this->getVideoSinkSSRC());
+
+	   uint32_t* ptr2 = reinterpret_cast<uint32_t*>(rtcpPacket + pos);
+	   ptr2[0] = htonl(this->getVideoSinkSSRC());
+	   pos += 4;
+
+	   fbSink_->deliverFeedback((char*)rtcpPacket, pos);
+	   return pos;
+	}
+   return -1;
+ }
+
+
+
   int ExternalOutput::sendFirPacket() {
     if (fbSink_ != NULL) {
-      //ELOG_DEBUG("Sending FIR");
+      ELOG_DEBUG("Sending FIR");
       sequenceNumberFIR_++; // do not increase if repetition
       int pos = 0;
       uint8_t rtcpPacket[50];
@@ -394,6 +549,75 @@ namespace erizo {
 
     return -1;
   }
+
+  //RR ROUTINES
+
+ void init_seq(sourcestat *s, uint16_t seq)   {
+       s->base_seq = seq;
+       s->max_seq = seq;
+       s->bad_seq = RTP_SEQ_MOD + 1;   /* so seq == bad_seq is false */
+       s->cycles = 0;
+       s->received = 0;
+       s->received_prior = 0;
+       s->expected_prior = 0;
+  }
+
+ int update_seq(sourcestat *s, uint16_t seq)   {
+       uint16_t udelta = seq - s->max_seq;
+       const int MAX_DROPOUT = 3000;
+       const int MAX_MISORDER = 100;
+       const int MIN_SEQUENTIAL = 2;
+
+       /*
+        * Source is not valid until MIN_SEQUENTIAL packets with
+        * sequential sequence numbers have been received.
+        */
+       if (s->probation) {
+           /* packet is in sequence */
+           if (seq == s->max_seq + 1) {
+               s->probation--;
+               s->max_seq = seq;
+               if (s->probation == 0) {
+                   init_seq(s, seq);
+                   s->received++;
+                   return 1;
+               }
+           } else {
+               s->probation = MIN_SEQUENTIAL - 1;
+               s->max_seq = seq;
+           }
+           return 0;
+       } else if (udelta < MAX_DROPOUT) {
+           /* in order, with permissible gap */
+           if (seq < s->max_seq) {
+               /*
+                * Sequence number wrapped - count another 64K cycle.
+                */
+               s->cycles += RTP_SEQ_MOD;
+           }
+           s->max_seq = seq;
+       } else if (udelta <= RTP_SEQ_MOD - MAX_MISORDER) {
+           /* the sequence number made a very large jump */
+           if (seq == s->bad_seq) {
+               /*
+                * Two sequential packets -- assume that the other side
+                * restarted without telling us so just re-sync
+                * (i.e., pretend this was the first packet).
+                */
+               init_seq(s, seq);
+           }
+           else {
+               s->bad_seq = (seq + 1) & (RTP_SEQ_MOD-1);
+               return 0;
+           }
+       } else {
+           /* duplicate or reordered packet */
+       }
+       s->received++;
+       return 1;
+   }
+
+  //END RR ROUTINES
 
   void ExternalOutput::encodeLoop() {
     while (running == true) {

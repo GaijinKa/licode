@@ -10,6 +10,7 @@
 #include "MediaProcessor.h"
 #include "boost/thread.hpp"
 #include "logger.h"
+#include "../rtputils.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -36,16 +37,22 @@ namespace erizo{
       char* sendVideoBuffer_;
       bool initContext();
       int sendFirPacket();
+      int sendRembPacket(uint32_t bitrate);
       void encodeLoop();
+
+
+      // RATECONTROL - REMB - RR
+      void init_seq(sourcestat *s, uint16_t seq);
+      int update_seq(sourcestat *s, uint16_t seq);
 
       bool running;
 
-      struct timeval tv;
+//      struct timeval tv;
       boost::mutex queueMutex_;
       boost::thread thread_, encodeThread_;
       std::queue<RawDataPacket> packetQueue_;
       AVStream        *video_st, *audio_st;
-      
+
       AudioEncoder* audioCoder_;
       int gotUnpackagedFrame_;
       int unpackagedSize_;
@@ -53,7 +60,6 @@ namespace erizo{
       int warmupfpsCount_;
       int sequenceNumberFIR_;
       int videoW, videoH;
-//      unsigned long long lastTime_;
       bool KFrame;
       double lastKeyFrame, lastTs;
       int video_stream_index, bufflen, aviores_, writeheadres_;
@@ -61,10 +67,20 @@ namespace erizo{
 
       AVFormatContext *context_;
       AVOutputFormat *oformat_;
-      AVCodec *videoCodec_, *audioCodec_; 
+      AVCodec *videoCodec_, *audioCodec_;
       AVCodecContext *videoCodecCtx_, *audioCodecCtx_;
       InputProcessor *in;
 
+
+      //RATECONTROL - REMB - RR
+      int failCount, successRate;
+      uint32_t lastWarmupTime_,lastAvgBitrate,avgBitrate;
+      struct sourcestat sourcehelper;
+
+      //dump
+      FILE* dumpRTP;
+      std::string dumppath;
+      const char *myheader;
 
       AVPacket avpacket;
       unsigned char* unpackagedBufferpart_;
@@ -72,7 +88,7 @@ namespace erizo{
       unsigned char unpackagedBuffer_[UNPACKAGE_BUFFER_SIZE];
       unsigned char unpackagedAudioBuffer_[UNPACKAGE_BUFFER_SIZE/10];
       unsigned long long initTime_;
-      double videoTs_;
+      uint32_t videoTs_;
       std::string globalpath;
   };
 }

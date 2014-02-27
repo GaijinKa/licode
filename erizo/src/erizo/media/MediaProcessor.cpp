@@ -73,7 +73,7 @@ namespace erizo {
   int InputProcessor::deliverVideoData(char* buf, int len) {
     if (videoUnpackager && videoDecoder) {
       int estimatedFps=0;
-      double videoTs2 = 0;
+      uint32_t videoTs2 = 0;
       bool fKframe = false;
 
       int ret = unpackageVideo(reinterpret_cast<unsigned char*>(buf), len,
@@ -263,7 +263,7 @@ namespace erizo {
   }
 
   int InputProcessor::unpackageVideo(unsigned char* inBuff, int inBuffLen,
-      unsigned char* outBuff, int* gotFrame, int* estimatedFps, double* videoTs, bool* KFrame) {
+      unsigned char* outBuff, int* gotFrame, int* estimatedFps, uint32_t* videoTs, bool* KFrame) {
 
     if (videoUnpackager == 0) {
       ELOG_DEBUG("Unpackager not correctly initialized");

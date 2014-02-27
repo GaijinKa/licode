@@ -222,6 +222,163 @@ typedef struct {
 } firheader;
 
 
+
+//    0                   1                   2                   3
+//    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+//   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//   |V=2|P| FMT=15  |   PT=206      |             length            |
+//   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//   |                  SSRC of packet sender                        |
+//   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//   |                  SSRC of media source                         |
+//   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//   |  Unique identifier 'R' 'E' 'M' 'B'                            |
+//   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//   |  Num SSRC     | BR Exp    |  BR Mantissa                      |
+//   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//   |   SSRC feedback                                               |
+//   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//   |  ...                                                          |
+//
+//   The fields V, P, SSRC, and length are defined in the RTP
+//   specification [2], the respective meaning being summarized below:
+//
+//   version (V): (2 bits):   This field identifies the RTP version.  The
+//               current version is 2.
+
+//   padding (P) (1 bit):   If set, the padding bit indicates that the
+//               packet contains additional padding octets at the end that
+//               are not part of the control information but are included
+//               in the length field.  Always 0.
+
+//   Feedback message type (FMT) (5 bits):  This field identifies the type
+//               of the FB message and is interpreted relative to the type
+//               (transport layer, payload- specific, or application layer
+//               feedback).  Always 15, application layer feedback
+//               message.  RFC 4585 section 6.4.
+
+//   Payload type (PT) (8 bits):   This is the RTCP packet type that
+//               identifies the packet as being an RTCP FB message.
+//               Always PSFB (206), Payload-specific FB message.  RFC 4585
+//               section 6.4.
+
+//   Length (16 bits):  The length of this packet in 32-bit words minus
+//               one, including the header and any padding.  This is in
+//               line with the definition of the length field used in RTCP
+//               sender and receiver reports [3].  RFC 4585 section 6.4.
+
+//   SSRC of packet sender (32 bits):  The synchronization source
+//               identifier for the originator of this packet.  RFC 4585
+//               section 6.4.
+
+//   SSRC of media source (32 bits):  Always 0; this is the same
+//               convention as in [RFC5104] section 4.2.2.2 (TMMBN).
+
+//   Unique identifier (32 bits):  Always 'R' 'E' 'M' 'B' (4 ASCII
+//               characters).
+
+//   Num SSRC (8 bits):  Number of SSRCs in this message.
+
+//   BR Exp (6 bits):   The exponential scaling of the mantissa for the
+//               maximum total media bit rate value, ignoring all packet
+//               overhead.  The value is an unsigned integer [0..63], as
+//               in RFC 5104 section 4.2.2.1.
+
+//   BR Mantissa (18 bits):   The mantissa of the maximum total media bit
+//               rate (ignoring all packet overhead) that the sender of
+//               the REMB estimates.  The BR is the estimate of the
+//               traveled path for the SSRCs reported in this message.
+//               The value is an unsigned integer in number of bits per
+//               second.
+
+//   SSRC feedback (32 bits)  Consists of one or more SSRC entries which
+//               this feedback message applies to.
+//
+//
+//
+typedef struct {
+    uint32_t fmt :5;
+    uint32_t padding :1;
+    uint32_t version :2;
+    uint32_t packettype :8;
+    uint32_t length :16;
+    uint32_t ssrc;
+    uint32_t ssrcofmediasource;
+    uint32_t rembidentifier;
+    uint32_t numssrc:8;
+    uint32_t brexp:6;
+    uint32_t brmantissa:18;
+    uint32_t ssrcfeedback;
+} rembheader;
+
+
+//	 0                   1                   2                   3
+//	 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|V=2|P|    RC   |   PT=SR=200   |             length            | header
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                         SSRC of sender                        |
+//	+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+//	|              NTP timestamp, most significant word             | sender
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ info
+//	|             NTP timestamp, least significant word             |
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                         RTP timestamp                         |
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                     sender's packet count                     |
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                      sender's octet count                     |
+//	+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+//	|      	          SSRC_1 (SSRC of first source)                 | report
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ block
+//	| fraction lost |       cumulative number of packets lost       |   1
+//	-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|           extended highest sequence number received           |
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                      interarrival jitter                      |
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                         last SR (LSR)                         |
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+//	|                   delay since last SR (DLSR)                  |
+//	+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+//	|                 SSRC_2 (SSRC of second source)                | report
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ block
+//	:                               ...                             :   2
+//	+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+//	|                  profile-specific extensions                  |
+//	+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+
+typedef struct {
+    uint32_t blockcount :5;
+    uint32_t padding :1;
+    uint32_t version :2;
+    uint32_t packettype :8;
+    uint32_t length :16;
+    uint32_t ssrc;
+} SRheader;
+
+typedef struct {
+	uint32_t ntptsmoresig;
+	uint32_t ntptslesssig;
+	uint32_t rtptimestamp;
+	uint32_t senderpktcount;
+	uint32_t senderoctet;
+} SRInfo;
+
+typedef struct {
+       uint32_t ssrc;             /* data source being reported */
+       unsigned int fraction:8;  /* fraction lost since last SR/RR */
+       int lost:24;              /* cumul. no. pkts lost (signed!) */
+       uint32_t last_seq;         /* extended last seq. no. received */
+       uint32_t jitter;           /* interarrival jitter */
+       uint32_t lsr;              /* last SR packet from this source */
+       uint32_t dlsr;             /* delay since last SR packet */
+} SRBlock;
+
+
+
 //     0                   1                    2                   3
 //     0 1 2 3 4 5 6 7 8 9 0 1 2 3  4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 //    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -261,6 +418,39 @@ struct redheader {
     }
 };
 
+
+// PACKET RR
+struct rtcp_rr_t {
+       unsigned int version:2;   /* protocol version */
+       unsigned int p:1;         /* padding flag */
+       unsigned int count:5;     /* varies by packet type */
+       unsigned int pt:8;        /* RTCP packet type */
+       uint16_t length;           /* pkt len in words, w/o this word */
+       uint32_t ssrcsender;     		 /* receiver generating this report */
+       uint32_t ssrc;             /* data source being reported */
+       unsigned int fraction:8;  /* fraction lost since last SR/RR */
+       int lost:24;              /* cumul. no. pkts lost (signed!) */
+       uint32_t last_seq;         /* extended last seq. no. received */
+       uint32_t jitter;           /* interarrival jitter */
+       uint32_t lsr;              /* last SR packet from this source */
+       uint32_t dlsr;             /* delay since last SR packet */
+};
+
+
+struct sourcestat{
+       uint16_t max_seq;        /* highest seq. number seen */
+       uint32_t cycles;         /* shifted count of seq. number cycles */
+       uint32_t base_seq;       /* base seq number */
+       uint32_t bad_seq;        /* last 'bad' seq number + 1 */
+       uint32_t probation;      /* sequ. packets till source is valid */
+       uint32_t received;       /* packets received */
+       uint32_t expected_prior; /* packet expected at last interval */
+       uint32_t received_prior; /* packet received at last interval */
+       uint32_t transit;        /* relative trans time for prev pkt */
+       uint32_t jitter;         /* estimated jitter */
+};
+
+
 // Payload types
 #define RTCP_Sender_PT      200 // RTCP Sender Report
 #define RTCP_Receiver_PT    201 // RTCP Receiver Report
@@ -280,5 +470,9 @@ struct redheader {
 #define CN_32000_PT         106 // CN Audio Codec
 #define CN_48000_PT         107 // CN Audio Codec
 #define TEL_8000_PT         126 // Tel Audio Events
+
+//HELPERS
+#define RTP_SEQ_MOD (1<<16)
+
 
 #endif /* RTPUTILS_H */

@@ -77,8 +77,9 @@ public:
 	 * @return the size of the data sent
 	 */
 	int sendFirPacket();
+        int sendPliPacket();
 	int sendRembPacket(uint32_t bitrate);
-
+        int resendRR(char* buf, int len);
 	void setWebRTCConnectionStateListener(
 			WebRtcConnectionStateListener* listener);
 	/**
@@ -111,8 +112,9 @@ private:
 	volatile bool sending_;
 	void sendLoop();
 	void writeSsrc(char* buf, int len, unsigned int ssrc);
-  void processRtcpHeaders(char* buf, int len, unsigned int ssrc);
-  
+  	void processRtcpHeaders(char* buf, int len, unsigned int ssrc);
+  	void printRtcpHeaders(char* buf, int len);
+
 	bool audioEnabled_;
 	bool videoEnabled_;
 

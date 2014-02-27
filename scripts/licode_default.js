@@ -20,6 +20,8 @@ config.erizoController.stunServerUrl = 'stun:stun.l.google.com:19302';
 config.erizoController.defaultVideoBW = 300;
 config.erizoController.maxVideoBW = 300;
 
+//Use '' to automatically get IP from the interface
+config.erizoController.publicIP = '';
 
 //Use undefined to run clients without Turn
 config.erizoController.turnServer = {};
