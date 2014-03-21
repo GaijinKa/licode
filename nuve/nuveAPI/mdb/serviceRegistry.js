@@ -1,6 +1,6 @@
 /*global require, exports, console*/
 var db = require('./dataBase').db;
-var BSON = require('mongodb').BSONPure;
+var BSON = require('mongodb').db;
 
 
 /*
@@ -19,7 +19,7 @@ exports.getList = function (callback) {
 
 var getService = exports.getService = function (id, callback) {
     "use strict";
-    db.services.findOne({_id: new BSON.ObjectID(id)}, function (err, service) {
+    db.services.findOne({_id: new db.ObjectId(id)}, function (err, service) {
         if (service === undefined) {
             console.log("Service not found");
         }
@@ -70,7 +70,7 @@ exports.removeService = function (id) {
     "use strict";
     hasService(id, function (hasS) {
         if (hasS) {
-            db.services.remove({_id: new BSON.ObjectID(id)}, function (error, saved) {
+            db.services.remove({_id: new db.ObjectId(id)}, function (error, saved) {
                 if (error) console.log('MongoDB: Error removing service: ', error);
             });
         }

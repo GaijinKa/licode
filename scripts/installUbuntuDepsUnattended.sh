@@ -27,24 +27,14 @@ parse_arguments(){
   done
 }
 
-cleanup(){
-   if [ -d $LIB_DIR ]; then
-     cd $LIB_DIR
-     rm -r libnice*
-     rm -r libav*
-     rm -r openssl*
-     cd $CURRENT_DIR
-   fi
-}
-
 install_apt_deps(){
-  sudo apt-get install python-software-properties
-  sudo apt-get install software-properties-common
+  sudo apt-get update
+  sudo apt-get install -qq python-software-properties
+  sudo apt-get install -qq software-properties-common
   sudo add-apt-repository ppa:chris-lea/node.js
   sudo apt-get update
-#  sudo apt-get install git make gcc g++ libssl-dev cmake libnice10 libnice-dev libglib2.0-dev pkg-config nodejs libboost-regex-dev libboost-thread-dev libboost-system-dev liblog4cxx10-dev rabbitmq-server mongodb openjdk-6-jre curl
-   sudo apt-get install git make gcc g++ libssl-dev cmake libglib2.0-dev pkg-config nodejs libboost-regex-dev libboost-thread-dev libboost-system-dev liblog4cxx10-dev rabbitmq-server mongodb openjdk-6-jre curl  
-sudo npm install -g node-gyp
+  sudo apt-get install -qq git make gcc g++ libssl-dev cmake libglib2.0-dev pkg-config nodejs libboost-regex-dev libboost-thread-dev libboost-system-dev liblog4cxx10-dev rabbitmq-server mongodb openjdk-6-jre curl
+  sudo npm install -g node-gyp
   sudo chown -R `whoami` ~/.npm ~/tmp/
 }
 
@@ -70,6 +60,7 @@ install_libnice(){
     curl -O http://nice.freedesktop.org/releases/libnice-0.1.4.tar.gz
     tar -zxvf libnice-0.1.4.tar.gz
     cd libnice-0.1.4
+    patch -R ./agent/conncheck.c < $PATHNAME/libnice-014.patch0
     ./configure --prefix=$PREFIX_DIR
     make -s V=0
     make install
@@ -81,7 +72,7 @@ install_libnice(){
 }
 
 install_mediadeps(){
-  sudo apt-get install yasm libvpx. libx264.
+  sudo apt-get -qq install yasm libvpx. libx264.
   if [ -d $LIB_DIR ]; then
     cd $LIB_DIR
     curl -O https://www.libav.org/releases/libav-9.9.tar.gz
@@ -99,7 +90,7 @@ install_mediadeps(){
 }
 
 install_mediadeps_nogpl(){
-  sudo apt-get install yasm libvpx.
+  sudo apt-get -qq install yasm libvpx.
   if [ -d $LIB_DIR ]; then
     cd $LIB_DIR
     curl -O https://www.libav.org/releases/libav-9.9.tar.gz
@@ -124,27 +115,28 @@ install_libsrtp(){
   cd $CURRENT_DIR
 }
 
+cleanup(){  
+  if [ -d $LIB_DIR ]; then
+    cd $LIB_DIR
+    rm -r libnice*
+    rm -r libav*
+    rm -r openssl*
+    cd $CURRENT_DIR
+  fi
+}
+
 parse_arguments $*
 
 mkdir -p $PREFIX_DIR
 
-pause "Installing deps via apt-get... [press Enter]"
 install_apt_deps
-
-pause "Installing openssl library...  [press Enter]"
 install_openssl
-
-pause "Installing libnice library...  [press Enter]"
 install_libnice
-
-pause "Installing libsrtp library...  [press Enter]"
 install_libsrtp
 
 if [ "$ENABLE_GPL" = "true" ]; then
-  pause "GPL libraries enabled"
   install_mediadeps
 else
-  pause "No GPL libraries enabled, this disables h264 transcoding, to enable gpl please use the --enable-gpl option"
   install_mediadeps_nogpl
 fi
 

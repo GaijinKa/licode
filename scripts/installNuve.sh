@@ -16,9 +16,13 @@ install_nuve(){
 
 populate_mongo(){
 
-  echo [licode] Starting mongodb
-  if [ ! -d "$DB_DIR" ]; then
-    mkdir -p "$DB_DIR"/db
+  if ! pgrep mongod; then
+     echo [licode] Starting mongodb
+     if [ ! -d "$DB_DIR" ]; then
+       mkdir -p "$DB_DIR"/db
+     fi
+  else
+     echo [licode] mongodb already running
   fi
   mongod --repair --dbpath $DB_DIR
   mongod --dbpath $DB_DIR --logpath $BUILD_DIR/mongo.log --fork
@@ -37,9 +41,10 @@ populate_mongo(){
   SERVID=`echo $SERVID| cut -d'"' -f 2`
   SERVID=`echo $SERVID| cut -d'"' -f 1`
 
-  echo "Mongo Logs: "
-  cat $BUILD_DIR/mongo.log
-
+  if [ -f "$BUILD_DIR/mongo.log" ]; then
+     echo "Mongo Logs: "
+     cat $BUILD_DIR/mongo.log
+  fi
   echo [licode] SuperService ID $SERVID
   echo [licode] SuperService KEY $SERVKEY
   cd $BUILD_DIR

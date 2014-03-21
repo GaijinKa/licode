@@ -10,7 +10,6 @@
 #include "MediaProcessor.h"
 #include "boost/thread.hpp"
 #include "logger.h"
-#include "../rtputils.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -38,25 +37,16 @@ namespace erizo{
       bool initContext();
       int sendFirPacket();
       int sendRembPacket(uint32_t bitrate);
-      void sendLoop();
-      int writeAudioData(char* buf, int len);
-      int writeVideoData(char* buf, int len);
+      void encodeLoop();
 
-      // RATECONTROL - REMB - RR
-      void init_seq(sourcestat *s, uint16_t seq);
-      int update_seq(sourcestat *s, uint16_t seq);
+      bool running;
 
-      volatile bool sending_;
-
-//      struct timeval tv;
+      struct timeval tv;
       boost::mutex queueMutex_;
-//      boost::thread thread_, encodeThread_;
-//      std::queue<RawDataPacket> packetQueue_;
-	boost::thread thread_;
-     	boost::condition_variable cond_;
-       std::queue<dataPacket> packetQueue_;
+      boost::thread thread_, encodeThread_;
+      std::queue<RawDataPacket> packetQueue_;
       AVStream        *video_st, *audio_st;
-
+      
       AudioEncoder* audioCoder_;
       int gotUnpackagedFrame_;
       int unpackagedSize_;
@@ -64,6 +54,7 @@ namespace erizo{
       int warmupfpsCount_;
       int sequenceNumberFIR_;
       int videoW, videoH;
+//      unsigned long long lastTime_;
       bool KFrame;
       double lastKeyFrame, lastTs;
       int video_stream_index, bufflen, aviores_, writeheadres_;
@@ -71,20 +62,10 @@ namespace erizo{
 
       AVFormatContext *context_;
       AVOutputFormat *oformat_;
-      AVCodec *videoCodec_, *audioCodec_;
+      AVCodec *videoCodec_, *audioCodec_; 
       AVCodecContext *videoCodecCtx_, *audioCodecCtx_;
       InputProcessor *in;
 
-
-      //RATECONTROL - REMB - RR
-      int failCount, successRate;
-      uint32_t lastWarmupTime_,lastAvgBitrate,avgBitrate;
-      struct sourcestat sourcehelper;
-
-      //dump
-      FILE* dumpRTP;
-      std::string dumppath;
-      const char *myheader;
 
       AVPacket avpacket;
       unsigned char* unpackagedBufferpart_;
@@ -92,7 +73,7 @@ namespace erizo{
       unsigned char unpackagedBuffer_[UNPACKAGE_BUFFER_SIZE];
       unsigned char unpackagedAudioBuffer_[UNPACKAGE_BUFFER_SIZE/10];
       unsigned long long initTime_;
-      uint32_t videoTs_;
+      double videoTs_;
       std::string globalpath;
   };
 }

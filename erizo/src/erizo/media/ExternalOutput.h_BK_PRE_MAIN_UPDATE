@@ -38,23 +38,19 @@ namespace erizo{
       bool initContext();
       int sendFirPacket();
       int sendRembPacket(uint32_t bitrate);
-      void sendLoop();
-      int writeAudioData(char* buf, int len);
-      int writeVideoData(char* buf, int len);
+      void encodeLoop();
+
 
       // RATECONTROL - REMB - RR
       void init_seq(sourcestat *s, uint16_t seq);
       int update_seq(sourcestat *s, uint16_t seq);
 
-      volatile bool sending_;
+      bool running;
 
 //      struct timeval tv;
       boost::mutex queueMutex_;
-//      boost::thread thread_, encodeThread_;
-//      std::queue<RawDataPacket> packetQueue_;
-	boost::thread thread_;
-     	boost::condition_variable cond_;
-       std::queue<dataPacket> packetQueue_;
+      boost::thread thread_, encodeThread_;
+      std::queue<RawDataPacket> packetQueue_;
       AVStream        *video_st, *audio_st;
 
       AudioEncoder* audioCoder_;

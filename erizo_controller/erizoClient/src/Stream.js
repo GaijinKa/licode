@@ -113,7 +113,8 @@ Erizo.Stream = function (spec) {
     };
 
     that.play = function (elementID, options, callback) {
-        that.elementID = elementID;
+        options = options || {};
+	that.elementID = elementID;
         if (that.hasVideo() || this.hasScreen()) {
             // Draw on HTML
             if (elementID !== undefined) {

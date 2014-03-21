@@ -10,7 +10,6 @@
 #include "MediaProcessor.h"
 #include "boost/thread.hpp"
 #include "logger.h"
-#include "../rtputils.h"
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -38,25 +37,16 @@ namespace erizo{
       bool initContext();
       int sendFirPacket();
       int sendRembPacket(uint32_t bitrate);
-      void sendLoop();
-      int writeAudioData(char* buf, int len);
-      int writeVideoData(char* buf, int len);
+      void encodeLoop();
 
-      // RATECONTROL - REMB - RR
-      void init_seq(sourcestat *s, uint16_t seq);
-      int update_seq(sourcestat *s, uint16_t seq);
+      bool running;
 
-      volatile bool sending_;
-
-//      struct timeval tv;
+      struct timeval tv;
       boost::mutex queueMutex_;
-//      boost::thread thread_, encodeThread_;
-//      std::queue<RawDataPacket> packetQueue_;
-	boost::thread thread_;
-     	boost::condition_variable cond_;
-       std::queue<dataPacket> packetQueue_;
+      boost::thread thread_, encodeThread_;
+      std::queue<RawDataPacket> packetQueue_;
       AVStream        *video_st, *audio_st;
-
+      
       AudioEncoder* audioCoder_;
       int gotUnpackagedFrame_;
       int unpackagedSize_;
@@ -76,10 +66,9 @@ namespace erizo{
       InputProcessor *in;
 
 
-      //RATECONTROL - REMB - RR
+      //REMB
       int failCount, successRate;
       uint32_t lastWarmupTime_,lastAvgBitrate,avgBitrate;
-      struct sourcestat sourcehelper;
 
       //dump
       FILE* dumpRTP;

@@ -20,6 +20,7 @@ var WARNING_N_ROOMS = config.erizoController.warning_n_rooms;
 var LIMIT_N_ROOMS = config.erizoController.limit_n_rooms;
 
 var INTERVAL_TIME_KEEPALIVE = config.erizoController.interval_time_keepAlive;
+var BINDED_INTERFACE_NAME = config.erizoController.networkInterface;
 
 var myId;
 var rooms = {};
@@ -81,18 +82,22 @@ var addToCloudHandler = function (callback) {
                 if (interfaces[k].hasOwnProperty(k2)) {
                     address = interfaces[k][k2];
                     if (address.family === 'IPv4' && !address.internal) {
-                        addresses.push(address.address);
+                        if (k === BINDED_INTERFACE_NAME || !BINDED_INTERFACE_NAME) {
+                              addresses.push(address.address);
+                        }				
                     }
                 }
             }
         }
     }
 
-    if (config.erizoController.publicIP==='')
-       publicIP = addresses[0];
-    else
-       publicIP = config.erizoController.publicIP;
+    privateRegexp = new RegExp(addresses[0], 'g');
 
+    if (config.erizoController.publicIP === '' || config.erizoController.publicIP === undefined){
+       publicIP = addresses[0];
+    } else {
+       publicIP = config.erizoController.publicIP;
+    }
 
     privateRegexp = new RegExp(publicIP, 'g');
 

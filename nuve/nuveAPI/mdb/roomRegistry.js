@@ -1,12 +1,12 @@
 /*global require, exports, console*/
 var db = require('./dataBase').db;
-var BSON = require('mongodb').BSONPure;
+var BSON = require('mongodb').db;
 
 
 var getRoom = exports.getRoom = function (id, callback) {
     "use strict";
 
-    db.rooms.findOne({_id: new BSON.ObjectID(id)}, function (err, room) {
+    db.rooms.findOne({_id: new db.ObjectId(id)}, function (err, room) {
         if (room === undefined) {
             console.log('Room ', id, ' not found');
         }
@@ -47,7 +47,7 @@ exports.removeRoom = function (id) {
     "use strict";
     hasRoom(id, function (hasR) {
         if (hasR) {
-            db.rooms.remove({_id: new BSON.ObjectID(id)}, function (error, removed) {
+            db.rooms.remove({_id: new db.ObjectId(id)}, function (error, removed) {
                 if (error) console.log('MongoDB: Error romoving room: ', error);
             });
         }

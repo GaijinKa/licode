@@ -23,6 +23,9 @@ config.erizoController.maxVideoBW = 300;
 //Use '' to automatically get IP from the interface
 config.erizoController.publicIP = '';
 
+// Use the name of the inferface you want to bind to for websockets
+// config.erizoController.networkInterface = 'eth1'
+
 //Use undefined to run clients without Turn
 config.erizoController.turnServer = {};
 config.erizoController.turnServer.url = '';

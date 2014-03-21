@@ -21,7 +21,8 @@ typedef unsigned int uint;
 
 namespace erizo {
 //forward declarations
-struct CandidateInfo;
+//struct CandidateInfo;
+class CandidateInfo;
 class WebRtcConnection;
 
 /**

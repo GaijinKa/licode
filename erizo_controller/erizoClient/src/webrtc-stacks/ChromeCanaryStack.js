@@ -241,8 +241,6 @@ Erizo.ChromeCanaryStack = function (spec) {
 
                     var newOffer = sessionDescription.sdp;
 
-                    var newOffer = sessionDescription.sdp;
-
                     if (newOffer !== that.prevOffer) {
 
                         that.peerConnection.setLocalDescription(sessionDescription);
