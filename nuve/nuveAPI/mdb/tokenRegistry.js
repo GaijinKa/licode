@@ -1,6 +1,5 @@
 /*global require, exports, console*/
 var db = require('./dataBase').db;
-var BSON = require('mongodb').db;
 
 /*
  * Gets a list of the tokens in the data base.

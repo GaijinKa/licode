@@ -1,6 +1,5 @@
 /*global require, exports, console*/
 var db = require('./dataBase').db;
-var BSON = require('mongodb').db;
 
 
 var getRoom = exports.getRoom = function (id, callback) {
