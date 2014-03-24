@@ -1,8 +1,8 @@
 #include <cstring>
 
-#include "RtpPacketQueue.h"
 #include "../../MediaDefinitions.h"
 #include "RtpHeader.h"
+#include "RtpPacketQueue.h"
 
 
 namespace erizo{
@@ -85,7 +85,7 @@ namespace erizo{
     boost::shared_ptr<dataPacket> packet(new dataPacket());
     memcpy(packet->data, data, length);
     packet->length = length;
-    queue_.insert(std::map< int, boost::shared_ptr<dataPacket>>::value_type(nseq,packet));
+    queue_.insert(std::map< int, boost::shared_ptr<dataPacket> >::value_type(nseq,packet));
 
   }
 

@@ -8,8 +8,8 @@
 
 namespace erizo{
   //forward declaration
-  class dataPacket; 
-  
+  class dataPacket;
+
   class RtpPacketQueue
   {
     DECLARE_LOGGER();
@@ -26,7 +26,7 @@ namespace erizo{
     static const int MAX_DIFF = 50;
     static const int MAX_DIFF_TS = 50000;
     static const unsigned int MAX_SIZE = 10;
-    std::map< int, boost::shared_ptr<dataPacket>> queue_;
+    std::map< int, boost::shared_ptr<dataPacket> > queue_;
     uint16_t lastNseq_;
     uint32_t lastTs_;
 

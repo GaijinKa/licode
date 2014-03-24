@@ -263,13 +263,13 @@ exports.WebRtcController = function () {
     };
 
     /*
-     * Removes a client from the session. This removes the publisher and all the subscribers related.
+     * Removes all the subscribers related with a client.
      */
-    that.removeClient = function (from, streamId) {
+    that.removeSubscriptions = function (from) {
 
         var key, index;
 
-        logger.info('Removing client ', from);
+        logger.info('Removing subscription of ', from);
         for (key in subscribers) {
             if (subscribers.hasOwnProperty(key)) {
                 index = subscribers[key].indexOf(from);
@@ -281,12 +281,6 @@ exports.WebRtcController = function () {
             }
         }
 
-        if (subscribers[streamId] !== undefined && publishers[streamId] !== undefined) {
-            logger.info('Removing muxer', streamId);
-            publishers[streamId].close();
-            delete subscribers[streamId];
-            delete publishers[streamId];
-        }
     };
 
     return that;

@@ -386,6 +386,10 @@ namespace erizo {
 //   }
 
    int ExternalOutput::deliverVideoData(char* buf, int len) {
+     rtcpheader *head = reinterpret_cast<rtcpheader*>(buf);
+     if (head->isRtcp()){
+       return 0;
+     }
      this->queueData(buf,len,VIDEO_PACKET);
      return 0;
    }
@@ -396,15 +400,11 @@ void ExternalOutput::queueData(char* buffer, int length, packetType type){
      }
      boost::mutex::scoped_lock lock(queueMutex_);
 
-     if (packetQueue_.size()>1000){
-       return;
+     if (type == VIDEO_PACKET){
+       videoQueue_.pushPacket(buffer, length);
+     }else{
+       audioQueue_.pushPacket(buffer, length);
      }
-     dataPacket p;
-     memset(p.data, 0,length);
-     memcpy(p.data, buffer, length);
-     p.type = type;
-     p.length = length;
-     packetQueue_.push(p);
      cond_.notify_one();
 }
 
@@ -643,20 +643,28 @@ void ExternalOutput::sendLoop() {
  
      while (sending_ == true) {
        boost::unique_lock<boost::mutex> lock(queueMutex_);
-       while (packetQueue_.size() == 0) {
+       while ((!audioQueue_.getSize())&&(!videoQueue_.getSize())) {
          cond_.wait(lock);
          if (sending_ == false) {
            lock.unlock();
            return;
          }
        }
- 
+     if (audioQueue_.getSize()){
+        boost::shared_ptr<dataPacket> audioP = audioQueue_.popPacket();
+        this->writeAudioData(audioP->data, audioP->length);
+      }
+      if (videoQueue_.getSize()) {
+        boost::shared_ptr<dataPacket> videoP = videoQueue_.popPacket();
+        this->writeVideoData(videoP->data, videoP->length);
+      }
+/*
        if (packetQueue_.front().type == VIDEO_PACKET) {
          this->writeVideoData(packetQueue_.front().data, packetQueue_.front().length);
       } else {
 	  this->writeAudioData(packetQueue_.front().data, packetQueue_.front().length);
       }
-        packetQueue_.pop();
+*/
        lock.unlock();
     }
   }
