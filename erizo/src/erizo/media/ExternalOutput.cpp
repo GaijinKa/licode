@@ -161,7 +161,9 @@ namespace erizo {
 
         fclose(dumpRTP);
    }
-
+    sending_ = false;
+    cond_.notify_one();
+    thread_.join();
     ELOG_DEBUG("ExternalOutput closed Successfully");
     return;
   }

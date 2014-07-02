@@ -22,7 +22,7 @@ namespace erizo {
   static const char *audio = "m=audio";
   static const char *ice_user = "a=ice-ufrag";
   static const char *ice_pass = "a=ice-pwd";
-  static const char *ssrctag = "a=ssrc";
+  static const char *ssrctag = "a=ssrc:";
   static const char *savpf = "SAVPF";
   static const char *rtpmap = "a=rtpmap:";
   static const char *rtcpmux = "a=rtcp-mux";
@@ -547,8 +547,9 @@ namespace erizo {
         char* pch;
         pch = strtok(line, " : \n");
         pch = strtok(NULL, ": \n");
-        if (mtype == VIDEO_TYPE) {
+        if (mtype == VIDEO_TYPE && !hasVideoSsrc) {
           videoSsrc = strtoul(pch, NULL, 10);
+          ELOG_DEBUG("SET VIDEO SSRC TO %lu", videoSsrc);
 	  hasVideoSsrc = true;
         } else if (mtype == AUDIO_TYPE) {
           audioSsrc = strtoul(pch, NULL, 10);
