@@ -70,6 +70,7 @@ install_libnice(){
     curl -O http://nice.freedesktop.org/releases/libnice-0.1.4.tar.gz
     tar -zxvf libnice-0.1.4.tar.gz
     cd libnice-0.1.4
+    patch -R ./agent/conncheck.c < $PATHNAME/libnice-014.patch0
     ./configure --prefix=$PREFIX_DIR
     make -s V=0
     make install
@@ -129,23 +130,23 @@ parse_arguments $*
 mkdir -p $PREFIX_DIR
 
 pause "Installing deps via apt-get... [press Enter]"
-install_apt_deps
+#install_apt_deps
 
 pause "Installing openssl library...  [press Enter]"
-install_openssl
+#install_openssl
 
 pause "Installing libnice library...  [press Enter]"
 install_libnice
 
 pause "Installing libsrtp library...  [press Enter]"
-install_libsrtp
+#install_libsrtp
 
 if [ "$ENABLE_GPL" = "true" ]; then
   pause "GPL libraries enabled"
-  install_mediadeps
+ # install_mediadeps
 else
   pause "No GPL libraries enabled, this disables h264 transcoding, to enable gpl please use the --enable-gpl option"
-  install_mediadeps_nogpl
+  #install_mediadeps_nogpl
 fi
 
 if [ "$CLEANUP" = "true" ]; then

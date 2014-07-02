@@ -38,12 +38,12 @@ config.erizoController.interval_time_keepAlive = 1000;
 
 //STUN server IP address and port to be used by the server.
 //if '' is used, the address is discovered locally
-config.erizo.stunserver = '';
-config.erizo.stunport = 0;
+config.erizo.stunserver = 'stun.l.google.com';
+config.erizo.stunport = 19302;
 
 //note, this won't work with all versions of libnice. With 0 all the available ports are used
-config.erizo.minport = 0;
-config.erizo.maxport = 0;
+config.erizo.minport = 20000;
+config.erizo.maxport = 30000;
 
 config.cloudProvider.name = '';
 //In Amazon Ec2 instances you can specify the zone host. By default is 'ec2.us-east-1a.amazonaws.com' 

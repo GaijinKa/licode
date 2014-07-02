@@ -263,18 +263,18 @@ namespace erizo {
      if (dumpRTP!=NULL) {
 
  	int myh = fwrite(myheader, sizeof(char), 8, dumpRTP);
-        ELOG_DEBUG("  >> Printing header pt.1: %zu bytes\n", myh);
+//        ELOG_DEBUG("  >> Printing header pt.1: %zu bytes\n", myh);
 
         uint16_t header_bytes = htons(len);
         int hby = fwrite(&header_bytes, sizeof(uint16_t), 1, dumpRTP);
-        ELOG_DEBUG("  >> Printing header pt.2: %zu bytes\n", hby);
+//        ELOG_DEBUG("  >> Printing header pt.2: %zu bytes\n", hby);
 
         /* Save packet on file */
 //        int hbuf = fwrite(reinterpret_cast<unsigned char*>(buf), sizeof(char), len, dumpRTP);
 	int hbuf = 0, tot = len;
  	while(tot > 0) {
          	hbuf = fwrite(reinterpret_cast<unsigned char*>(buf+len-tot), sizeof(char), tot, dumpRTP);
-         	ELOG_DEBUG("  >> Printing buffer: %zu bytes\n", hbuf);
+ //        	ELOG_DEBUG("  >> Printing buffer: %zu bytes\n", hbuf);
   		if(hbuf <= 0) {
           		ELOG_DEBUG("  >> >> Error!\n");
    			break;
@@ -362,8 +362,7 @@ namespace erizo {
         av_init_packet(&avpkt);
         avpkt.data = unpackagedBufferpart_;
         avpkt.size = unpackagedSize_;
-        avpkt.pts = (videoTs_ - initTime_)/90;
-//	avpkt.dts = AV_NOPTS_VALUE;
+	avpkt.pts = (videoTs_ - initTime_)/90;
         avpkt.stream_index = 0;
         if(KFrame) {
         	avpkt.flags |= AV_PKT_FLAG_KEY;
