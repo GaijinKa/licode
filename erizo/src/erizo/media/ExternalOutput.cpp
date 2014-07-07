@@ -358,8 +358,9 @@ namespace erizo {
         av_init_packet(&avpkt);
         avpkt.data = unpackagedBufferpart_;
         avpkt.size = unpackagedSize_;
-        avpkt.pts = AV_NOPTS_VALUE; //(videoTs_ - initTime_)/90;
-	avpkt.dts = AV_NOPTS_VALUE;
+        avpkt.pts = (videoTs_ - initTime_)/90;        
+//      avpkt.pts = AV_NOPTS_VALUE; 
+//      avpkt.dts = AV_NOPTS_VALUE;
         avpkt.stream_index = 0;
         if(KFrame) {
         	avpkt.flags |= AV_PKT_FLAG_KEY;
