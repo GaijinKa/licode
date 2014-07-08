@@ -52,7 +52,7 @@ config.cloudProvider.accessKey = '';
 config.cloudProvider.secretAccessKey = '';
 
 // Recording 
-config.erizo.recorderpath = "/home/ubuntu/lynckia/recorded/";
+config.erizo.recorderpath = "/root/meetecho/recorded/";
 
 // Roles to be used by services
 config.roles = {"presenter":["publish", "subscribe", "record"], "viewer":["subscribe"]};
