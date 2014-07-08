@@ -24,8 +24,8 @@ populate_mongo(){
   else
      echo [licode] mongodb already running
   fi
-  mongod --repair --dbpath $DB_DIR
-  mongod --dbpath $DB_DIR --logpath $BUILD_DIR/mongo.log --fork
+  mongod --repair --dbpath $DB_DIR --nojournal
+  mongod --dbpath $DB_DIR --logpath $BUILD_DIR/mongo.log --fork --nojournal
   sleep 5
 
   dbURL=`grep "config.nuve.dataBaseURL" $PATHNAME/licode_default.js`
