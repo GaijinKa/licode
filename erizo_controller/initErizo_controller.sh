@@ -9,6 +9,6 @@ echo $LD_LIBRARY_PATH
 
 cd $ROOT/erizoController
 #node erizoController.js &
-forever start -l erizolog.log -o erizolog.out -e erizolog.err erizoController.js
+forever start -a -l erizolog.log -o erizolog.out -e erizolog.err erizoController.js
 
 cd $CURRENT_DIR
